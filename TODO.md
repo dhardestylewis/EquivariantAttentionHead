@@ -1,0 +1,10 @@
+- [x] Scaffold LaTeX workspace
+  - Create project skeleton and add initial files: `main.tex`, `README.md`, `build.ps1`, and `.vscode/extensions.json`.
+- [x] Insert provided math document
+  - Place the user's provided mathematical document into `main.tex` (initially as verbatim placeholder).
+- [x] Add build instructions
+  - Add `README.md` with instructions for installing a LaTeX distribution on Windows and how to run `pdflatex` via PowerShell; add `build.ps1` to run the build.
+- [ ] Typeset cleanup (optional)
+  - (Optional) Convert verbatim to proper LaTeX math environments and run `pdflatex` to produce `main.pdf` — request confirmation before doing this.
+- [x] Typeset cleanup (optional)
+  - (Optional) Convert verbatim to proper LaTeX math environments and run `pdflatex` to produce `main.pdf` — request confirmation before doing this.
