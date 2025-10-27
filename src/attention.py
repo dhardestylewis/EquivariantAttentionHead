@@ -184,7 +184,7 @@ class RelativePositionAttention(nn.Module):
                 # R_rel has shape (N, N, d_h, d_h)
 
                 # For each query i, rotate all keys j: k'_{i,j} = R_{i,j} @ k_j
-                K_rot = torch.einsum('ijhw,jw->ihw', R_rel, K_proj[b, :, h, :])  # (N, N, d_h)
+                K_rot = torch.einsum('ijhw,jw->ijh', R_rel, K_proj[b, :, h, :])  # (N, N, d_h)
 
                 # Compute attention scores: α_ij = q_i^T k'_{i,j} (T4.4)
                 attn_scores = torch.einsum('ih,ijh->ij', Q_proj[b, :, h, :], K_rot)  # (N, N)
@@ -199,7 +199,7 @@ class RelativePositionAttention(nn.Module):
                 attn_weights = self.dropout(attn_weights)
 
                 # Apply attention to values
-                out = torch.einsum('ij,jh->ih', attn_weights, V[b, :, h, :])  # (N, d_h)
+                out = attn_weights @ V[b, :, h, :]  # (N, d_h)
                 batch_outputs.append(out)
 
                 # Accumulate commutator loss (T5.1)

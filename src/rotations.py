@@ -124,16 +124,20 @@ class StructuredRotation(nn.Module):
         """
         L_list = self.get_generators()
 
-        max_comm_norm = 0.0
+        comm_norms = []
         for i in range(len(L_list)):
             for j in range(i + 1, len(L_list)):
                 # Compute [L_i, L_j] = L_i L_j - L_j L_i
                 comm = L_list[i] @ L_list[j] - L_list[j] @ L_list[i]
                 # Frobenius norm (can use operator norm instead)
                 comm_norm = torch.norm(comm, p='fro')
-                max_comm_norm = max(max_comm_norm, comm_norm)
+                comm_norms.append(comm_norm)
 
-        return torch.tensor(max_comm_norm, device=L_list[0].device)
+        if not comm_norms:
+            device = L_list[0].device
+            return torch.zeros((), device=device, dtype=L_list[0].dtype, requires_grad=True)
+
+        return torch.stack(comm_norms).max()
 
 
 class RelativePositionRotation(nn.Module):
