@@ -1,0 +1,692 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\geometry{margin=0.75in}
+\usepackage{hyperref}
+
+\title{Relative-Position Attention via Commuting Skew Generators:\\Compact Axiomatic Proof}
+\author{}
+\date{}
+
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Cplx}{\mathbb{C}}
+\newcommand{\eqdef}{\overset{\varnothing}{=}}
+\newcommand{\deps}[1]{\quad[\mathrm{deps}:#1]}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Every claim is a boxed statement with explicit dependency tracking. This is an independent proof path using compact notation to demonstrate the relative-position property of structured attention from first principles.
+\end{abstract}
+
+\section*{S0: Foundations}
+
+\subsection*{S0.1--S0.5: Basic Objects}
+
+\[
+\boxed{[\mathrm{S0}.1:\mathbb{N}]}\quad
+\Nat \eqdef \{1,2,3,\dots\}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.2:\mathrm{Idx}]}\quad
+d_h,d_c,D\in\Nat,\;
+H \eqdef \{1,\dots,d_h\},\;
+K \eqdef \{1,\dots,d_c\}
+\deps{\mathrm{S0}.1}
+\]
+
+\[
+\boxed{[\mathrm{S0}.3:I_n]}\quad
+I_n \eqdef [\delta_{ij}]_{i,j=1}^n,\;
+\delta_{ij} \eqdef \begin{cases}1& i=j\\ 0& i\neq j\end{cases}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.4:(\cdot)^\top,(\cdot)^*]}\quad
+A^\top\in\Real^{m\times n} \text{ if } A\in\Real^{n\times m},\;
+B^* \eqdef \overline{B}^\top \text{ if } B\in\Cplx^{n\times m}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.5:\ker,\mathrm{im},\sigma,\oplus]}\quad
+\ker M \eqdef \{x\mid Mx=0\},\;
+\mathrm{im}(M) \eqdef \{Mx\},\;
+\sigma(M)\subset\Cplx,\;
+\bigoplus_{u=1}^m M_u \eqdef \mathrm{diag}(M_1,\dots,M_m)
+\deps{\varnothing}
+\]
+
+\subsection*{S0.6--S0.6j: Determinant Identities (NEW)}
+
+\[
+\boxed{[\mathrm{S0}.6:\det]}\quad
+\det:\Real^{n\times n}\to\Real \text{ (standard determinant)}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.6\mathrm{a}:\det_{AB}]}\quad
+\det(AB) = \det(A)\det(B)
+\deps{\mathrm{S0}.6}
+\]
+
+\[
+\boxed{[\mathrm{S0}.6\mathrm{b}:\det_{A^\top}]}\quad
+\det(A^\top) = \det(A)
+\deps{\mathrm{S0}.6,\mathrm{S0}.4}
+\]
+
+\[
+\boxed{[\mathrm{S0}.6\mathrm{c}:\det_{\oplus}]}\quad
+\det\begin{bmatrix}M_1&0\\0&M_2\end{bmatrix} = \det(M_1)\det(M_2)
+\deps{\mathrm{S0}.6,\mathrm{S0}.5}
+\]
+
+\[
+\boxed{[\mathrm{S0}.6\mathrm{d}:\det_{UXU^\top}]}\quad
+U\in O(n) \Rightarrow \det(UXU^\top) = \det(X)
+\deps{\mathrm{S0}.6\mathrm{a},\mathrm{S0}.6\mathrm{b}}
+\]
+
+\[
+\boxed{[\mathrm{S0}.6\mathrm{e}:(A^{-1})^\top]}\quad
+(A^{-1})^\top = (A^\top)^{-1}
+\deps{\mathrm{S0}.4}
+\]
+
+\subsection*{S0.7--S0.10j: Matrix Exponential and Groups (NEW)}
+
+\[
+\boxed{[\mathrm{S0}.7:[A,B]]}\quad
+[A,B] \eqdef AB-BA
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.8:O,SO]}\quad
+O(n) \eqdef \{Q\mid Q^\top Q=I_n\},\;
+SO(n) \eqdef \{Q\in O(n)\mid \det Q=+1\}
+\deps{\mathrm{S0}.3,\mathrm{S0}.4,\mathrm{S0}.6}
+\]
+
+\[
+\boxed{[\mathrm{S0}.9:\det O]}\quad
+Q\in O(n) \Rightarrow (\det Q)^2=1 \Rightarrow \det Q\in\{\pm1\}
+\deps{\mathrm{S0}.8,\mathrm{S0}.6\mathrm{a},\mathrm{S0}.6\mathrm{b},\mathrm{S0}.3}
+\]
+
+\[
+\boxed{[\mathrm{S0}.10:\exp]}\quad
+\exp(M) \eqdef \sum_{t\ge0}\frac{1}{t!}M^t,\;
+[A,B]=0 \Rightarrow \exp(A+B)=\exp(A)\exp(B)
+\deps{\mathrm{S0}.7}
+\]
+
+\[
+\boxed{[\mathrm{S0}.10\mathrm{a}:\exp_{(M)^\top}]}\quad
+\exp(M^\top) = (\exp M)^\top
+\deps{\mathrm{S0}.10,\mathrm{S0}.4}
+\]
+
+\[
+\boxed{[\mathrm{S0}.10\mathrm{b}:\exp_{UXU^{-1}}]}\quad
+\exp(UXU^{-1}) = U(\exp X)U^{-1}
+\deps{\mathrm{S0}.10}
+\]
+
+\[
+\boxed{[\mathrm{S0}.10\mathrm{c}:\exp_{\oplus}]}\quad
+\exp\Big(\bigoplus_{u=1}^m M_u\Big) = \bigoplus_{u=1}^m \exp(M_u)
+\deps{\mathrm{S0}.10,\mathrm{S0}.5}
+\]
+
+\[
+\boxed{[\mathrm{S0}.10\mathrm{d}:\det\exp]}\quad
+\det(\exp M) = \exp(\mathrm{tr}\,M)
+\deps{\mathrm{S0}.10,\mathrm{S0}.6}
+\]
+
+\[
+\boxed{[\mathrm{S0}.10\mathrm{e}:\mathrm{tr}(S)=0]}\quad
+S^\top = -S \Rightarrow \mathrm{tr}(S) = 0
+\deps{\mathrm{S0}.4}
+\]
+
+\subsection*{S0.11--S0.12: Planar Rotations}
+
+\[
+\boxed{[\mathrm{S0}.11:J,R_2]}\quad
+J \eqdef \begin{bmatrix}0&-1\\1&0\end{bmatrix},\;
+R_2(\theta) \eqdef \exp(\theta J)
+\deps{\mathrm{S0}.10}
+\]
+
+\[
+\boxed{[\mathrm{S0}.12:R_2\in SO(2)]}\quad
+R_2(\theta)^\top R_2(\theta)=I_2,\;
+\det R_2(\theta)=+1 \Rightarrow R_2(\theta)\in SO(2)
+\deps{\mathrm{S0}.11,\mathrm{S0}.10\mathrm{a},\mathrm{S0}.10\mathrm{d},\mathrm{S0}.10\mathrm{e},\mathrm{S0}.8}
+\]
+
+\[
+\boxed{[\mathrm{S0}.12\mathrm{a}:R_2\text{ group law}]}\quad
+R_2(a)^\top R_2(b) = R_2(b-a)
+\deps{\mathrm{S0}.12,\mathrm{S0}.10,\mathrm{S0}.10\mathrm{a}}
+\]
+
+\subsection*{S0.13--S0.13c: Skew-Symmetric Spectral Theory (NEW)}
+
+\[
+\boxed{[\mathrm{S0}.13:\mathrm{skew}\Rightarrow\mathrm{normal}]}\quad
+S^\top=-S \Rightarrow S^\top S=SS^\top \Rightarrow S\text{ normal}
+\deps{\mathrm{S0}.4}
+\]
+
+\[
+\boxed{[\mathrm{S0}.13\mathrm{a}:\sigma(S)\subset i\Real]}\quad
+S^\top=-S,\; Sx=\lambda x,\; x\neq 0 \Rightarrow \lambda = -\overline{\lambda} \Rightarrow \lambda\in i\Real
+\deps{\mathrm{S0}.13,\mathrm{S0}.4,\mathrm{S0}.5}
+\]
+
+\[
+\boxed{[\mathrm{S0}.13\mathrm{b}:\pm\text{ pairs}]}\quad
+S^\top=-S,\; \lambda\in\sigma(S) \Rightarrow -\lambda\in\sigma(S)
+\deps{\mathrm{S0}.13\mathrm{a},\mathrm{S0}.5}
+\]
+
+\[
+\boxed{[\mathrm{S0}.13\mathrm{c}:\sigma_{\min}(I+S_-)}\geq 1]}\quad
+S_-^\top = -S_- \Rightarrow \sigma_{\min}(I+S_-) \geq 1
+\deps{\mathrm{S0}.13\mathrm{a},\mathrm{S0}.3}
+\]
+
+\subsection*{S0.14--S0.15: Projectors and Cayley Identity}
+
+\[
+\boxed{[\mathrm{S0}.14:\mathrm{orth.\,proj.}]}\quad
+P^2=P \wedge P^\top=P \wedge Q^2=Q \wedge Q^\top=Q \wedge PQ=0 \Rightarrow \mathrm{im}(P)\perp\mathrm{im}(Q)
+\deps{\mathrm{S0}.4,\mathrm{S0}.5}
+\]
+
+\[
+\boxed{[\mathrm{S0}.15:\mathrm{Cayley\,id}]}\quad
+(I-S)(I+S)=(I+S)(I-S)=I-S^2
+\deps{\mathrm{S0}.3}
+\]
+
+\subsection*{S0.16--S0.19: Norms and Perturbation (NEW FIXED)}
+
+\[
+\boxed{[\mathrm{S0}.16:|\cdot|\text{ op. norm}]}\quad
+|\cdot|:\Real^{m\times n}\to\Real_{\geq 0} \text{ is operator 2-norm},\;
+|AB|\le|A||B|,\;|A+B|\le|A|+|B|
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.16\mathrm{a}:|\cdot|_1\text{ vector}]}\quad
+\text{For } x\in\Real^n:\; |x|_1 \eqdef \sum_{k=1}^n |x_k|,\;
+\text{For } x\in\Real^n:\; |x| \text{ is Euclidean norm}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S0}.17:\approx_\varepsilon]}\quad
+X\approx_\varepsilon Y \overset{\varnothing}{\Leftrightarrow} |X-Y|\le\varepsilon
+\deps{\mathrm{S0}.16}
+\]
+
+\[
+\boxed{[\mathrm{S0}.18:\mathrm{BCH}]}\quad
+\exp(M)\exp(N)=\exp\big(M+N+\tfrac12[M,N]+R(M,N)\big),\; |R(M,N)|=O(|[M,N]|^2)
+\deps{\mathrm{S0}.7,\mathrm{S0}.10,\mathrm{S0}.16}
+\]
+
+\[
+\boxed{[\mathrm{S0}.19:\mathrm{Weyl}]}\quad
+|\sigma_{\min}(A+E)-\sigma_{\min}(A)|\le|E|
+\deps{\mathrm{S0}.16}
+\]
+
+\section*{S1: Commuting Skew Generators}
+
+\[
+\boxed{[\mathrm{S1}.1:L_k]}\quad
+\forall k\in K:\; L_k\in\Real^{d_h\times d_h},\; L_k^\top=-L_k,\; [L_a,L_b]=0
+\deps{\mathrm{S0}.2,\mathrm{S0}.7,\mathrm{S0}.13,\mathrm{S0}.4}
+\]
+
+\[
+\boxed{[\mathrm{S1}.2:\mathrm{comm.\,normal}]}\quad
+\{L_k\} \text{ pairwise commuting normal}
+\deps{\mathrm{S1}.1,\mathrm{S0}.13,\mathrm{S0}.7}
+\]
+
+\[
+\boxed{[\mathrm{S1}.3:A(r)]}\quad
+A(r) \eqdef \sum_{k=1}^{d_c} [r]_k L_k
+\deps{\mathrm{S0}.2,\mathrm{S1}.1}
+\]
+
+\[
+\boxed{[\mathrm{S1}.4:A(r)^\top]}\quad
+A(r)^\top=-A(r)
+\deps{\mathrm{S1}.3,\mathrm{S1}.1,\mathrm{S0}.4}
+\]
+
+\[
+\boxed{[\mathrm{S1}.5:[A(r),A(s)]]}\quad
+[A(r),A(s)]=0
+\deps{\mathrm{S1}.3,\mathrm{S1}.1,\mathrm{S0}.7}
+\]
+
+\[
+\boxed{[\mathrm{S1}.6:R_{\mathrm{STR}}]}\quad
+R_{\mathrm{STR}}(r) \eqdef \exp(A(r))
+\deps{\mathrm{S1}.3,\mathrm{S0}.10}
+\]
+
+\section*{S2: Simultaneous Block Structure}
+
+\subsection*{S2.1: Complex Simultaneous Diagonalization}
+
+\[
+\boxed{[\mathrm{S2}.1:\mathrm{Thm.\,comm.\,normal}]}\quad
+\text{Theorem: Commuting normal matrices admit simultaneous unitary diagonalization}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S2}.1\mathrm{a}:\exists\mathcal{U}_c]}\quad
+\exists\mathcal{U}_c\in U(d_h):\; \forall k,\; \mathcal{U}_c^*L_k\mathcal{U}_c=\mathrm{diag}(i\lambda_{k,1},\dots,i\lambda_{k,d_h}),\; \lambda_{k,j}\in\Real
+\deps{\mathrm{S1}.2,\mathrm{S0}.13\mathrm{a},\mathrm{S2}.1}
+\]
+
+\subsection*{S2.2--S2.3a: Real Simultaneous Block Form (NEW THEOREM)}
+
+\[
+\boxed{[\mathrm{S2}.2:\mathrm{Thm.\,real\,block}]}\quad
+\text{Theorem: Commuting real skew families } \Rightarrow \text{ simultaneous real } 2\times 2 \text{ block form}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S2}.2\mathrm{a}:\text{Proof sketch}]}\quad
+\begin{array}{l}
+\text{1. From S2.1a: } \mathcal{U}_c^* L_k \mathcal{U}_c = \mathrm{diag}(i\lambda_{k,j}) \\
+\text{2. From S0.13b: eigenvalues come in } \pm i\mu \text{ pairs} \\
+\text{3. Realification: pair conjugate eigenspaces } \Rightarrow \text{ real 2D invariant planes} \\
+\text{4. Commutation: } [L_a,L_b]=0 \Rightarrow \text{ same planes for all } k \\
+\text{5. Construct } U\in O(d_h) \text{ giving common 2D block decomposition}
+\end{array}
+\deps{\mathrm{S2}.1\mathrm{a},\mathrm{S0}.13\mathrm{b},\mathrm{S1}.1}
+\]
+
+\[
+\boxed{[\mathrm{S2}.3:U\in O]}\quad
+\exists U\in O(d_h),\; m\in\Nat,\; d_{\mathrm{null}}\in\Nat:\; 2m+d_{\mathrm{null}}=d_h
+\deps{\mathrm{S2}.2,\mathrm{S0}.8,\mathrm{S0}.2}
+\]
+
+\[
+\boxed{[\mathrm{S2}.3\mathrm{a}:\mathrm{blk}(L_k)]}\quad
+U^\top L_k U=\Big(\bigoplus_{u=1}^m \lambda_{k,u}J\Big)\oplus 0_{d_{\mathrm{null}}\times d_{\mathrm{null}}},\; \lambda_{k,u}\in\Real
+\deps{\mathrm{S2}.2\mathrm{a},\mathrm{S2}.3,\mathrm{S0}.11}
+\]
+
+\subsection*{S2.4--S2.11: Projectors and Structured Rotation}
+
+\[
+\boxed{[\mathrm{S2}.4:\Pi]}\quad
+\Pi_{\mathrm{act}} \eqdef U\,\mathrm{diag}(I_{2m},0)\,U^\top,\;
+\Pi_{\mathrm{null}} \eqdef U\,\mathrm{diag}(0,I_{d_{\mathrm{null}}})\,U^\top
+\deps{\mathrm{S2}.3,\mathrm{S0}.3}
+\]
+
+\[
+\boxed{[\mathrm{S2}.4\mathrm{a}:\Pi\text{ properties}]}\quad
+\Pi_{\mathrm{act}}^2=\Pi_{\mathrm{act}},\; \Pi_{\mathrm{act}}^\top=\Pi_{\mathrm{act}},\;
+\Pi_{\mathrm{act}}\Pi_{\mathrm{null}}=0,\;
+\Pi_{\mathrm{act}}+\Pi_{\mathrm{null}}=I_{d_h}
+\deps{\mathrm{S2}.4,\mathrm{S0}.14,\mathrm{S0}.3,\mathrm{S0}.4}
+\]
+
+\[
+\boxed{[\mathrm{S2}.5:\beta,\theta]}\quad
+\beta_u \eqdef (\lambda_{1,u},\dots,\lambda_{d_c,u})^\top,\;
+\theta_u(r) \eqdef \beta_u^\top r
+\deps{\mathrm{S2}.3\mathrm{a}}
+\]
+
+\[
+\boxed{[\mathrm{S2}.6:U^\top A U]}\quad
+U^\top A(r)U=\Big(\bigoplus_{u=1}^m \theta_u(r)J\Big)\oplus 0
+\deps{\mathrm{S1}.3,\mathrm{S2}.3\mathrm{a},\mathrm{S2}.5,\mathrm{S0}.11}
+\]
+
+\[
+\boxed{[\mathrm{S2}.7:\exp\,\mathrm{blk}]}\quad
+\exp(U^\top A(r)U)=\Big(\bigoplus_{u=1}^m R_2(\theta_u(r))\Big)\oplus I_{d_{\mathrm{null}}}
+\deps{\mathrm{S2}.6,\mathrm{S0}.10\mathrm{c},\mathrm{S0}.11,\mathrm{S0}.3}
+\]
+
+\[
+\boxed{[\mathrm{S2}.8:R_{\mathrm{STR}}\,\mathrm{form}]}\quad
+R_{\mathrm{STR}}(r)=U\Big[\bigoplus_{u=1}^m R_2(\theta_u(r))\oplus I_{d_{\mathrm{null}}}\Big]U^\top
+\deps{\mathrm{S1}.6,\mathrm{S2}.7,\mathrm{S0}.10\mathrm{b},\mathrm{S2}.3}
+\]
+
+\[
+\boxed{[\mathrm{S2}.9:R_{\mathrm{STR}}\in SO]}\quad
+R_{\mathrm{STR}}(r)\in SO(d_h)
+\deps{\mathrm{S2}.8,\mathrm{S0}.12,\mathrm{S0}.8,\mathrm{S0}.6\mathrm{c},\mathrm{S0}.6\mathrm{d},\mathrm{S0}.9}
+\]
+
+\[
+\boxed{[\mathrm{S2}.10:\mathrm{rel}\,R_{\mathrm{STR}}]}\quad
+R_{\mathrm{STR}}(r_i)^\top R_{\mathrm{STR}}(r_j)=R_{\mathrm{STR}}(r_j-r_i)
+\deps{\mathrm{S2}.8,\mathrm{S0}.12\mathrm{a},\mathrm{S2}.5,\mathrm{S1}.5,\mathrm{S0}.10,\mathrm{S0}.10\mathrm{a}}
+\]
+
+\[
+\boxed{[\mathrm{S2}.11:\Pi\,\mathrm{comm}]}\quad
+R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}}=\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r)
+\deps{\mathrm{S2}.8,\mathrm{S2}.4}
+\]
+
+\section*{S3: Cayley Post-Rotation}
+
+\[
+\boxed{[\mathrm{S3}.1:S]}\quad
+S^\top=-S
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S3}.2:I+S\,\mathrm{inv}]}\quad
+-1\notin\sigma(S) \Rightarrow I+S\text{ invertible}
+\deps{\mathrm{S3}.1,\mathrm{S0}.13\mathrm{a},\mathrm{S0}.3}
+\]
+
+\[
+\boxed{[\mathrm{S3}.3:P_{\mathrm{sp}}]}\quad
+P_{\mathrm{sp}} \eqdef (I-S)(I+S)^{-1}
+\deps{\mathrm{S3}.2,\mathrm{S0}.15}
+\]
+
+\[
+\boxed{[\mathrm{S3}.4:P_{\mathrm{sp}}\in O]}\quad
+P_{\mathrm{sp}}^\top P_{\mathrm{sp}}=I \Rightarrow P_{\mathrm{sp}}\in O(d_h)
+\deps{\mathrm{S3}.1,\mathrm{S3}.3,\mathrm{S0}.8,\mathrm{S0}.4,\mathrm{S0}.15,\mathrm{S0}.6\mathrm{e}}
+\]
+
+\[
+\boxed{[\mathrm{S3}.5:\det P_{\mathrm{sp}}=1]}\quad
+\lambda\in\sigma(S) \Rightarrow \lambda=i\mu \Rightarrow \frac{1-i\mu}{1+i\mu}\in\mathbb{S}^1 \Rightarrow \det P_{\mathrm{sp}}=1
+\deps{\mathrm{S0}.13\mathrm{a},\mathrm{S0}.13\mathrm{b},\mathrm{S3}.3,\mathrm{S0}.9,\mathrm{S0}.8}
+\]
+
+\[
+\boxed{[\mathrm{S3}.6:\mathcal{A}(U),\mathcal{B}]}\quad
+\mathcal{A}(U) \eqdef \{U\,\mathrm{diag}(I_{2m},R_{\mathrm{null}})\,U^\top\mid R_{\mathrm{null}}\in SO(d_{\mathrm{null}}),\; -1\notin\sigma(R_{\mathrm{null}})\},\;
+\mathcal{B} \eqdef \{(I-S)(I+S)^{-1}\mid S^\top=-S\}
+\deps{\mathrm{S2}.3,\mathrm{S0}.8,\mathrm{S3}.3}
+\]
+
+\[
+\boxed{[\mathrm{S3}.7:\mathcal{A}\subseteq\mathcal{B}\subseteq SO\text{ (FIXED)}]}\quad
+\mathcal{A}(U)\subseteq\mathcal{B}\subseteq SO(d_h)
+\deps{\mathrm{S3}.6,\mathrm{S3}.4,\mathrm{S3}.5}
+\]
+
+\[
+\boxed{[\mathrm{S3}.7\mathrm{a}:\mathcal{A}\Rightarrow\mathcal{B}\text{ construction}]}\quad
+P\in\mathcal{A}(U) \Rightarrow \exists S_{\mathrm{null}}^\top=-S_{\mathrm{null}}: P=U\,\mathrm{diag}(I_{2m},(I-S_{\mathrm{null}})(I+S_{\mathrm{null}})^{-1})\,U^\top=(I-S)(I+S)^{-1}
+\deps{\mathrm{S3}.6,\mathrm{S0}.15,\mathrm{S3}.3}
+\]
+
+\section*{S4: Combined Rotation}
+
+\[
+\boxed{[\mathrm{S4}.1:R_{\mathrm{sp}}]}\quad
+R_{\mathrm{sp}}(r) \eqdef R_{\mathrm{STR}}(r)P_{\mathrm{sp}}
+\deps{\mathrm{S1}.6,\mathrm{S3}.3}
+\]
+
+\[
+\boxed{[\mathrm{S4}.2:R_{\mathrm{sp}}\in SO]}\quad
+R_{\mathrm{sp}}(r)\in SO(d_h)
+\deps{\mathrm{S2}.9,\mathrm{S3}.5,\mathrm{S4}.1,\mathrm{S0}.8,\mathrm{S0}.6\mathrm{a}}
+\]
+
+\[
+\boxed{[\mathrm{S4}.3:\Pi R_{\mathrm{sp}}\Pi]}\quad
+P_{\mathrm{sp}}\in\mathcal{A}(U) \Rightarrow \Pi_{\mathrm{act}}R_{\mathrm{sp}}(r)\Pi_{\mathrm{act}}=\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}}
+\deps{\mathrm{S3}.6,\mathrm{S2}.4,\mathrm{S2}.11,\mathrm{S4}.1}
+\]
+
+\[
+\boxed{[\mathrm{S4}.4:\Pi\text{-rel}]}\quad
+P_{\mathrm{sp}}\in\mathcal{A}(U) \Rightarrow
+\Pi_{\mathrm{act}}R_{\mathrm{sp}}(r_i)^\top R_{\mathrm{sp}}(r_j)\Pi_{\mathrm{act}}
+=\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r_j-r_i)\Pi_{\mathrm{act}}
+\deps{\mathrm{S4}.3,\mathrm{S2}.10}
+\]
+
+\[
+\boxed{[\mathrm{S4}.5:\Pi\text{-rel}\,\neg]}\quad
+P_{\mathrm{sp}}\in\mathcal{B}\setminus\mathcal{A}(U) \Rightarrow
+\neg(\forall r:\, \Pi_{\mathrm{act}}R_{\mathrm{sp}}(r)\Pi_{\mathrm{act}}=\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}})
+\deps{\mathrm{S3}.6,\mathrm{S2}.4,\mathrm{S4}.1}
+\]
+
+\section*{S5: Attention Scores}
+
+\[
+\boxed{[\mathrm{S5}.1:W,Q,K,V]}\quad
+W_Q,W_K,W_V\in\Real^{d_h\times D},\; x_i\in\Real^D,\; r_i\in\Real^{d_c},\;
+q_i=W_Qx_i,\; k_i=W_Kx_i,\; v_i=W_Vx_i
+\deps{\mathrm{S0}.2}
+\]
+
+\[
+\boxed{[\mathrm{S5}.2:\mathrm{act}\,q,k]}\quad
+q_i^{(\mathrm{act})}=\Pi_{\mathrm{act}}q_i,\; k_j^{(\mathrm{act})}=\Pi_{\mathrm{act}}k_j,\; d_{\mathrm{act}}=\mathrm{rank}(\Pi_{\mathrm{act}})=2m
+\deps{\mathrm{S2}.4,\mathrm{S2}.3}
+\]
+
+\[
+\boxed{[\mathrm{S5}.3:\tilde q,\tilde k]}\quad
+\tilde q_i=\Pi_{\mathrm{act}}R_{\mathrm{sp}}(r_i)q_i^{(\mathrm{act})},\;
+\tilde k_j=\Pi_{\mathrm{act}}R_{\mathrm{sp}}(r_j)k_j^{(\mathrm{act})}
+\deps{\mathrm{S4}.1,\mathrm{S2}.4,\mathrm{S5}.2}
+\]
+
+\[
+\boxed{[\mathrm{S5}.4:\alpha_{ij}]}\quad
+\alpha_{ij}=\frac{\tilde q_i^\top\tilde k_j}{\sqrt{d_{\mathrm{act}}}}
+\deps{\mathrm{S5}.3,\mathrm{S5}.2}
+\]
+
+\[
+\boxed{[\mathrm{S5}.5:\alpha\,\Pi\,\mathrm{form}]}\quad
+\alpha_{ij}
+=\frac{1}{\sqrt{d_{\mathrm{act}}}}
+(q_i^{(\mathrm{act})})^\top
+(\Pi_{\mathrm{act}}R_{\mathrm{sp}}(r_i)\Pi_{\mathrm{act}})^\top
+(\Pi_{\mathrm{act}}R_{\mathrm{sp}}(r_j)\Pi_{\mathrm{act}})
+k_j^{(\mathrm{act})}
+\deps{\mathrm{S5}.4,\mathrm{S5}.2,\mathrm{S2}.4\mathrm{a}}
+\]
+
+\[
+\boxed{[\mathrm{S5}.6:\alpha\,\mathrm{rel}]}\quad
+P_{\mathrm{sp}}\in\mathcal{A}(U) \Rightarrow
+\alpha_{ij}=\frac{1}{\sqrt{2m}}
+(q_i^{(\mathrm{act})})^\top
+(\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r_j-r_i)\Pi_{\mathrm{act}})
+k_j^{(\mathrm{act})}
+\deps{\mathrm{S5}.5,\mathrm{S4}.4,\mathrm{S2}.3}
+\]
+
+\section*{S6: Representation Theory (Optional)}
+
+\[
+\boxed{[\mathrm{S6}.1:\rho]}\quad
+\rho:\Real^{d_c}\to O(d_h) \text{ continuous homomorphism}
+\deps{\mathrm{S0}.8}
+\]
+
+\[
+\boxed{[\mathrm{S6}.2:\mathrm{Thm.\,Ab-rep}]}\quad
+\text{Theorem: Continuous hom. } \Real^{d_c}\to O(d_h) \Rightarrow \text{ block SO(2) form}
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S6}.3:\rho\,\mathrm{form}]}\quad
+\rho(r)=U\Big[\bigoplus_{u=1}^m R_2(\beta_u^\top r)\oplus I_{d_{\mathrm{null}}}\Big]U^\top
+\deps{\mathrm{S6}.1,\mathrm{S6}.2,\mathrm{S0}.12,\mathrm{S2}.3}
+\]
+
+\[
+\boxed{[\mathrm{S6}.4:\rho=R_{\mathrm{STR}}]}\quad
+\rho=R_{\mathrm{STR}} \Leftrightarrow \exists\{L_k\}\text{ as S1.1 with }\theta_u(r)=\beta_u^\top r
+\deps{\mathrm{S2}.8,\mathrm{S6}.3,\mathrm{S2}.5}
+\]
+
+\section*{S7: Robustness}
+
+\subsection*{S7.0: Smallness Regime (NEW)}
+
+\[
+\boxed{[\mathrm{S7}.0:\text{small regime}]}\quad
+\text{Assume } \varepsilon,\eta_{\mathrm{mix}} \text{ sufficiently small so BCH converges and Cayley is Lipschitz}
+\deps{\varnothing}
+\]
+
+\subsection*{S7.1--S7.4: Commutator Errors}
+
+\[
+\boxed{[\mathrm{S7}.1:\varepsilon_{ab}]}\quad
+\varepsilon_{ab} \eqdef |[L_a,L_b]|,\;
+\varepsilon \eqdef \max_{a,b}\varepsilon_{ab}
+\deps{\mathrm{S0}.16,\mathrm{S0}.7}
+\]
+
+\[
+\boxed{[\mathrm{S7}.2:[A(r),A(s)]\,\mathrm{bd}]}\quad
+|[A(r),A(s)]|\le\sum_{a,b}|[r]_a||[s]_b|\varepsilon_{ab}
+\le |r|_1|s|_1\varepsilon
+\deps{\mathrm{S1}.3,\mathrm{S7}.1,\mathrm{S0}.16,\mathrm{S0}.16\mathrm{a}}
+\]
+
+\[
+\boxed{[\mathrm{S7}.3:\mathrm{BCH\,err}]}\quad
+|\log(\exp(A(r))\exp(A(s)))-(A(r)+A(s))|
+\le \tfrac12|[A(r),A(s)]|+c|[A(r),A(s)]|^2
+\deps{\mathrm{S0}.18,\mathrm{S7}.2,\mathrm{S7}.0}
+\]
+
+\[
+\boxed{[\mathrm{S7}.4:\mathrm{rel}\,\approx]}\quad
+|R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s)-R_{\mathrm{STR}}(s-r)|
+\le C\varepsilon|r|_1|s|_1+O(\varepsilon^2)
+\deps{\mathrm{S1}.6,\mathrm{S7}.3,\mathrm{S0}.16,\mathrm{S0}.10\mathrm{a}}
+\]
+
+\subsection*{S7.5--S7.8a: Cayley Errors (NEW LEMMAS)}
+
+\[
+\boxed{[\mathrm{S7}.5:S=S_-+E]}\quad
+S=S_-+E,\; S_-^\top=-S_-,\; |E|\le\eta
+\deps{\varnothing}
+\]
+
+\[
+\boxed{[\mathrm{S7}.6:I+S\,\mathrm{cond}]}\quad
+\sigma_{\min}(I+S)\ge \sigma_{\min}(I+S_-)-|E| \ge 1-|E| \Rightarrow I+S\text{ invertible if }|E|<1
+\deps{\mathrm{S7}.5,\mathrm{S0}.19,\mathrm{S0}.13\mathrm{c},\mathrm{S3}.2,\mathrm{S0}.3}
+\]
+
+\[
+\boxed{[\mathrm{S7}.7:\mathrm{Cayley\,Lip}]}\quad
+\text{Lemma: Cayley }(I-S)(I+S)^{-1}\text{ is Lipschitz on }\{S:\sigma_{\min}(I+S)\geq\delta>0\}
+\deps{\mathrm{S3}.3,\mathrm{S0}.15}
+\]
+
+\[
+\boxed{[\mathrm{S7}.7\mathrm{a}:P_{\mathrm{sp}}(S)\approx P_{\mathrm{sp}}(S_-)]}\quad
+|P_{\mathrm{sp}}(S)-P_{\mathrm{sp}}(S_-)|\le C'\eta
+\deps{\mathrm{S7}.5,\mathrm{S7}.6,\mathrm{S7}.7,\mathrm{S0}.16,\mathrm{S3}.3,\mathrm{S7}.0}
+\]
+
+\[
+\boxed{[\mathrm{S7}.8:P_{\mathrm{sp}}=U\begin{bmatrix}A&B\\C&D\end{bmatrix}U^\top]}\quad
+\eta_{\mathrm{mix}} \eqdef |B|+|C|
+\deps{\mathrm{S2}.3,\mathrm{S2}.4,\mathrm{S0}.16}
+\]
+
+\[
+\boxed{[\mathrm{S7}.8\mathrm{a}:\text{block mixing lemma}]}\quad
+\text{Lemma: } P\in SO(d_h),\; P=U\begin{bmatrix}A&B\\C&D\end{bmatrix}U^\top,\; \eta_{\mathrm{mix}}=|B|+|C|\ll 1 \Rightarrow |A-I|\le c''\eta_{\mathrm{mix}}
+\deps{\mathrm{S0}.8,\mathrm{S7}.0}
+\]
+
+\[
+\boxed{[\mathrm{S7}.8\mathrm{b}:\Pi P\Pi\approx\Pi]}\quad
+|\Pi_{\mathrm{act}}P_{\mathrm{sp}}\Pi_{\mathrm{act}}-\Pi_{\mathrm{act}}|\le |A-I|\le c''\eta_{\mathrm{mix}}
+\deps{\mathrm{S7}.8,\mathrm{S7}.8\mathrm{a}}
+\]
+
+\subsection*{S7.9--S7.10: Combined Error Bound}
+
+\[
+\boxed{[\mathrm{S7}.9:\Pi R_{\mathrm{sp}}\Pi\,\approx]}\quad
+|\Pi_{\mathrm{act}}R_{\mathrm{sp}}(r)\Pi_{\mathrm{act}}-\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}}|\le C''\eta_{\mathrm{mix}}
+\deps{\mathrm{S4}.1,\mathrm{S7}.8\mathrm{b},\mathrm{S0}.16}
+\]
+
+\[
+\boxed{[\mathrm{S7}.10:\alpha\,\mathrm{stab}]}\quad
+\big|\alpha_{ij}-\tfrac{1}{\sqrt{2m}}(q_i^{(\mathrm{act})})^\top(\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r_j-r_i)\Pi_{\mathrm{act}})k_j^{(\mathrm{act})}\big|
+\le C'''(\varepsilon|r_i|_1|r_j|_1+\eta_{\mathrm{mix}})
+\cdot|q_i^{(\mathrm{act})}||k_j^{(\mathrm{act})}|
+\deps{\mathrm{S5}.5,\mathrm{S4}.4,\mathrm{S7}.4,\mathrm{S7}.9,\mathrm{S0}.16}
+\]
+
+\section*{S8: Main Theorems}
+
+\[
+\boxed{[\mathrm{S8}.1:\mathrm{GOAL\,(exact)}]}\quad
+(\mathrm{S1}.1\wedge \mathrm{S2}.3\wedge P_{\mathrm{sp}}\in\mathcal{A}(U)) \Rightarrow
+\alpha_{ij}=\frac{1}{\sqrt{2m}}(q_i^{(\mathrm{act})})^\top(\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r_j-r_i)\Pi_{\mathrm{act}})k_j^{(\mathrm{act})}
+\deps{\mathrm{S5}.6}
+\]
+
+\[
+\boxed{[\mathrm{S8}.2:\mathrm{GOAL\,(robust)}]}\quad
+(\mathrm{S1}.1\text{ up to }\varepsilon,\; P_{\mathrm{sp}}\in\mathcal{B}\text{ with }\eta_{\mathrm{mix}}) \Rightarrow
+\alpha_{ij}\approx_{\Delta}\frac{1}{\sqrt{2m}}(q_i^{(\mathrm{act})})^\top(\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r_j-r_i)\Pi_{\mathrm{act}})k_j^{(\mathrm{act})},\;
+\Delta\le C(\varepsilon|r_i|_1|r_j|_1+\eta_{\mathrm{mix}})|q_i^{(\mathrm{act})}||k_j^{(\mathrm{act})}|
+\deps{\mathrm{S7}.10,\mathrm{S0}.17}
+\]
+
+\section*{Interpretation}
+
+\textbf{S8.1} establishes: Under exact hypotheses (commuting skew generators + null-block-only post-rotation), attention scores depend \emph{only} on the relative position vector $r_j - r_i$.
+
+\textbf{S8.2} establishes: Under approximate hypotheses (small commutator $\varepsilon$ + small block-mixing $\eta_{\mathrm{mix}}$), attention scores are close to the ideal relative form with explicit error bound.
+
+The construction realizes RoPE-style relative-position attention as the unique equivariant family arising from commuting skew-symmetric Lie algebras.
+
+\end{document}
