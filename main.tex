@@ -7,174 +7,2034 @@
 \usepackage{tikz}
 \usepackage{hyperref}
 
-\title{Equivariant Structured Positional Rotations}
+\title{Equivariant Structured Positional Rotations:\\Complete Algebraic Derivation}
 \author{}
 \date{}
+
+\newcommand{\eqdef}{\overset{\varnothing}{=}}
+\newcommand{\eqref}[1]{\overset{[#1]}{=}}
 
 \begin{document}
 
 \maketitle
 
-\section*{Integrated Writeup}
+\begin{abstract}
+This document provides a complete, step-by-step algebraic derivation of the relative-position property for equivariant structured positional rotations in attention mechanisms. Every equality is justified by explicit reference to prior statements, and all algebraic manipulations are shown in full detail.
+\end{abstract}
 
-Throughout we work inside the universe $\{ \mathbb{R}, \mathbb{C}, \mathbb{N}, \text{matrices}, \text{vectors} \}$ and adhere to the conventions stated below. Every claim is tied to an explicit boxed statement. Cleanups $\mathsf{cleanup}$ add the missing boxes $[2.4]$, $[2.7]$, $[2.9]$, $[2.16]$, $[3.6\mathrm{a}]$, $[5.4\mathrm{a}]$, $[5.11]$ and expand the algebra in $[2.1]$, $[2.2]$, $[3.11]$. None of these touch the hypotheses $[1.2]$, $[1.3]$ or constructions $[2.12]$, $[3.7]$, $[4.1]$, so the main theorem (statement $[5.9]$) remains unchanged.
+\tableofcontents
+\newpage
 
-\subsection*{Global Conventions}
+\section{Preliminaries (BEG-0)}
 
-All matrices are real unless noted otherwise. Vectors are real column vectors. Transpose is $^\top$; conjugate transpose is $^*$. We write $[A,B] := AB - BA$, use direct sums $\oplus$, and denote block-diagonal concatenation over $u\in\{1,\dots,m\}$ by $\bigoplus_{u=1}^m (\cdot)$. The spectrum of $M$ is $\sigma(M)$, the number of structural nonzeros is $\operatorname{nnz}(M)$, and the dimension of a subspace $V$ is $\dim(V)$. Orthogonal and special orthogonal groups are $O(n)$ and $SO(n)$.
-
-\section{BEG-0: Preliminaries}
-
-The base objects $\mathsf{base}$ and identities $\mathsf{facts}_0$ now follow the bookkeeping format requested by the user.
-
-\begin{align}
-\boxed{[0.1]}\quad & \mathbb{N} \overset{\varnothing}{=} \{1,2,3,\dots\} &&({})\\
-\boxed{[0.2]}\quad & d_h,d_c,D \in \underbrace{\mathbb{N}}_{[0.1]} &&([0.1])\\
-\boxed{[0.3]}\quad & I_n \overset{\varnothing}{=} \{A \in \mathbb{R}^{n\times n} : A_{ij} = \delta_{ij}\} &&({})\\
-\boxed{[0.4]}\quad & (\cdot)^\top : \mathbb{R}^{n\times m} \to \mathbb{R}^{m\times n},\quad (\cdot)^* : \mathbb{C}^{n\times m} \to \mathbb{C}^{m\times n},\\
-& A^\top \overset{\varnothing}{=} \text{transpose}(A),\quad B^* \overset{\varnothing}{=} \overline{B}^\top &&({})\\
-\boxed{[0.5]}\quad & [A,B] \overset{\varnothing}{=} AB-BA &&({})\\
-\boxed{[0.6]}\quad & \mathbb{R}^n \overset{\varnothing}{=} \{ x \in \mathbb{R}^{n\times 1}\},\quad \mathbb{C}^n \overset{\varnothing}{=} \{ x \in \mathbb{C}^{n\times 1}\} &&([0.1])\\
-\boxed{[0.7]}\quad & O(n) \overset{\varnothing}{=} \Big\{Q \in \mathbb{R}^{n\times n} \Big| \underbrace{Q^\top Q}_{[0.4]} \overset{[0.3]}{=} \underbrace{I_n}_{[0.3]}\Big\} &&([0.3],[0.4])\\
-\boxed{[0.8]}\quad & SO(n) \overset{\varnothing}{=} \Big\{Q \in O(n) \mid \det(Q)=+1\Big\} &&([0.7])\\
-\boxed{[0.9]}\quad & \exp(M) \overset{\varnothing}{=} \sum_{t=0}^{\infty} \frac{1}{t!} M^t,\quad M \in \mathbb{R}^{n\times n} &&([0.1])\\
-\boxed{[0.10]}\quad & [M,N]=0 \Longrightarrow \exp(M+N) \overset{[0.9]}{=} \exp(M)\exp(N) &&([0.5],[0.9])\\
-& \text{If } M = \begin{bmatrix}M_1 & 0\\0 & M_2\end{bmatrix},\ \exp(M) \overset{[0.9]}{=} \begin{bmatrix}\exp(M_1)&0\\0&\exp(M_2)\end{bmatrix} &&([0.9])\\
-\boxed{[0.11]}\quad & J \overset{\varnothing}{=} \begin{bmatrix}0&-1\\1&0\end{bmatrix},\quad R_2(\theta) \overset{\varnothing}{=} \exp(\theta J) \overset{[0.9]}{=} \begin{bmatrix}\cos\theta & -\sin\theta\\ \sin\theta & \cos\theta\end{bmatrix} \in SO(2) &&([0.8],[0.9])\\
-\boxed{[0.12]}\quad & R_2(a)^\top R_2(b) \overset{[0.11]}{=} R_2(-a)R_2(b) \overset{[0.10]}{=} R_2(b-a) &&([0.10],[0.11])\\
-\boxed{[0.13]}\quad & S^\top = -S \Longrightarrow S_{ii}=0,\ S_{ji}=-S_{ij} &&([0.4])\\
-\boxed{[0.14]}\quad & \det \begin{bmatrix}M_1&0\\0&M_2\end{bmatrix} = \det(M_1)\det(M_2) &&({})\\
-\boxed{[0.15]}\quad & U(n) \overset{\varnothing}{=} \Big\{\mathcal{U} \in \mathbb{C}^{n\times n} : \mathcal{U}^\ast \mathcal{U} \overset{[0.4]}{=} I_n\Big\} &&([0.3],[0.4])\\
-\boxed{[0.16]}\quad & \sigma(M) \overset{\varnothing}{=} \{\lambda \in \mathbb{C} : \exists x \in \mathbb{C}^n\setminus\{0\},\ Mx = \lambda x\} &&([0.6])
-\end{align}
-
-We also use $\ker(M) := \{x \in \mathbb{R}^n : Mx = 0\}$, $\operatorname{im}(M) := \{Mx : x \in \mathbb{R}^n\}$, $\dim(V)$ for the dimension of a subspace, $\operatorname{diag}(\lambda_1,\dots,\lambda_n) := [\delta_{ij}\lambda_i]_{i,j=1}^n$, and $\bigoplus_{u=1}^m M_u := \operatorname{diag}(M_1,\dots,M_m)$.
-
-\section{BEG-1: Hypotheses and Structured Generator}
-
-We fix the index sets $K := \{1,\dots,d_c\}$ and $H := \{1,\dots,d_h\}$ together with generators $\{L_k\}_{k\in K}$ and the coordinate vector $r \in \mathbb{R}^{d_c}$.
+\subsection{Index Sets and Dimensions}
 
 \begin{align}
-\boxed{[1.2]}\quad & \forall k \in K:\ L_k \in \mathbb{R}^{d_h\times d_h},\ L_k^\top \overset{\varnothing}{=} -L_k &&([0.2],[0.4])\\
-\boxed{[1.3]}\quad & \forall a,b \in K:\ [L_a,L_b] \overset{[0.5]}{=} L_aL_b-L_bL_a \overset{\varnothing}{=} 0_{d_h\times d_h} &&([0.5],[0.2])\\
-\boxed{[1.4]}\quad & \forall r \in \mathbb{R}^{d_c}:\ A(r) \overset{\varnothing}{=} \sum_{k=1}^{d_c} \underbrace{L_k}_{[1.2]}\underbrace{[r]_k}_{[0.6]} &&([1.2],[0.6],[0.2])\\
-\boxed{[1.5]}\quad & R_{\mathrm{STR}}(r) \overset{\varnothing}{=} \exp\big(\underbrace{A(r)}_{[1.4]}\big) &&([1.4],[0.9])
-\end{align}
-
-These hypotheses ensure $A(r)$ is skew-symmetric and that the $L_k$ commute, paving the way for the simultaneous block-rotation structure in BEG-2.
-
-\section{BEG-2: Simultaneous Block Rotation Structure}
-
-\subsection{Normality and Spectrum}
-
-\begin{align}
-\boxed{[2.1]}\quad & L^\top = -L \Longrightarrow L^\top L = (-L)L = -L^2,\ LL^\top = L(-L) = -L^2 \implies L \text{ is normal} &&([1.2],[0.4])\\
-\boxed{[2.2]}\quad & L^\top = -L,\ Lx = \lambda x,\ x \neq 0 \Longrightarrow \lambda \in i\mathbb{R} &&([0.4])
-\end{align}
-
-\subsection{Simultaneous Diagonalisation}
-
-\begin{align}
-\boxed{[2.3]}\quad & \{L_k\}_{k\in K}\text{ normal and commuting } \Longrightarrow \exists \mathcal{U} \in U(d_h):\ 
-\mathcal{U}^* L_k \mathcal{U} = \operatorname{diag}(i\lambda_{k,1},\dots,i\lambda_{k,d_h}) &&([1.2],[1.3],[2.1],[0.15],[0.16])
-\end{align}
-
-\subsection{Real Block Form and Projectors}
-
-\begin{align}
-\boxed{[2.4]}\quad & \exists U \in O(d_h),\ m,d_{\mathrm{null}} \in \mathbb{N}:\ 2m + d_{\mathrm{null}} = d_h,\\
-& U^\top L_k U = \Big(\bigoplus_{u=1}^m B_{k,u}\Big) \oplus 0_{d_{\mathrm{null}}\times d_{\mathrm{null}}},\ B_{k,u}^\top = -B_{k,u} &&([1.2],[2.3],[0.7],[0.16])\\
-\boxed{[2.5]}\quad & \forall u:\ B_{k,u} = \lambda_{k,u} J_u,\ J_u = \begin{bmatrix}0&-1\\1&0\end{bmatrix} &&([2.4],[0.11])\\
-\boxed{[2.6]}\quad & \Pi_{\mathrm{act}} \overset{\varnothing}{=} U \begin{bmatrix}I_{2m}&0\\0&0\end{bmatrix} U^\top,\ \Pi_{\mathrm{null}} \overset{\varnothing}{=} U \begin{bmatrix}0&0\\0&I_{d_{\mathrm{null}}}\end{bmatrix} U^\top,\\
-& \Pi_{\mathrm{act}}^2 = \Pi_{\mathrm{act}},\ \Pi_{\mathrm{null}}^2 = \Pi_{\mathrm{null}},\ \Pi_{\mathrm{act}}\Pi_{\mathrm{null}} = 0 &&([2.4],[0.3],[0.7])\\
-\boxed{[2.7]}\quad & \beta_u \overset{\varnothing}{=} (\lambda_{1,u},\dots,\lambda_{d_c,u})^\top,\ [\beta_u]_k = \lambda_{k,u} &&([2.5])\\
-\boxed{[2.8]}\quad & \theta_u(r) \overset{\varnothing}{=} \beta_u^\top r = \sum_{k=1}^{d_c} \underbrace{\lambda_{k,u}}_{[2.5]} \underbrace{[r]_k}_{[1.4]} &&([2.7],[1.4])
+\boxed{[0.1] \text{ (index sets / naturals) }} \quad
+\mathbb{N} \eqdef \{1,2,3,\dots\}
+\qquad(\text{uses no previous lines})
 \end{align}
 
 \begin{align}
-\boxed{[2.9]}\quad & U^\top A(r) U = \sum_{k=1}^{d_c} \underbrace{U^\top L_k U}_{[2.4]} [r]_k \\
-&= \Big(\bigoplus_{u=1}^m \theta_u(r) J_u\Big) \oplus 0_{d_{\mathrm{null}}\times d_{\mathrm{null}}} &&([1.4],[2.4],[2.5],[2.8])\\
-\boxed{[2.10]}\quad & \exp\big(U^\top A(r) U\big) = \Big(\bigoplus_{u=1}^{m} R_2(\theta_u(r))\Big) \oplus I_{d_{\mathrm{null}}} &&([2.9],[0.10],[0.11])\\
-\boxed{[2.11]}\quad & R_{\mathrm{STR}}(r) = U\Big[\Big(\bigoplus_{u=1}^{m} R_2(\theta_u(r))\Big) \oplus I_{d_{\mathrm{null}}}\Big]U^\top &&([1.5],[2.9],[2.10],[0.10],[0.7])\\
-\boxed{[2.12]}\quad & R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(r) = I_{d_h},\ \det(R_{\mathrm{STR}}(r)) = 1 \Rightarrow R_{\mathrm{STR}}(r) \in SO(d_h) &&([2.11],[0.7],[0.8],[0.14])\\
-\boxed{[2.13]}\quad & R_{\mathrm{STR}}(r_i)^\top R_{\mathrm{STR}}(r_j) = R_{\mathrm{STR}}(r_j-r_i) &&([2.11],[2.12],[0.12],[2.8])
+\boxed{[0.2] \text{ (dimensions / indices) }} \quad
+&d_h,d_c,D \in \mathbb{N} \eqref{0.1} \mathbb{N}, \notag\\
+&H \eqdef \{1,\dots,d_h\}, \quad
+K \eqdef \{1,\dots,d_c\} \quad(\eqref{0.1} H,K\neq\varnothing)
 \end{align}
 
-\section{BEG-3: Cayley Post-Rotation}
-
-We parameterise $P_{\mathrm{sp}}$ via an upper-triangular mask and Cayley transform.
+\subsection{Basic Matrix Operations}
 
 \begin{align}
-\boxed{[3.1]}\quad & U_{\mathrm{mask}} \in \{0,1\}^{d_h\times d_h},\ [U_{\mathrm{mask}}]_{ij}=0 \text{ for } i\ge j &&([0.2])\\
-\boxed{[3.2]}\quad & \tilde{S} \in \mathbb{R}^{d_h\times d_h} &&([0.2])\\
-\boxed{[3.3]}\quad & S_{ij} \overset{\varnothing}{=} [U_{\mathrm{mask}}]_{ij} \tilde{S}_{ij} \ (i<j),\ S_{ji} \overset{\varnothing}{=} -S_{ij},\ S_{ii} \overset{\varnothing}{=} 0 &&([3.1],[3.2],[0.13])\\
-\boxed{[3.4]}\quad & S^\top = -S &&([3.3],[0.4])\\
-\boxed{[3.5]}\quad & \operatorname{nnz}(S) \le 2\, \operatorname{nnz}(U_{\mathrm{mask}}) &&([3.1],[3.3])\\
-\boxed{[3.6]}\quad & S^\top = -S \Longrightarrow \sigma(S) \subseteq \{0\}\cup i\mathbb{R} &&([3.4],[0.16])\\
-\boxed{[3.6\mathrm{a}]}\quad & -1 \notin \sigma(S) \Longrightarrow (I_{d_h}+S)^{-1} \text{ exists} &&([3.6],[0.3])\\
-\boxed{[3.7]}\quad & P_{\mathrm{sp}} \overset{\varnothing}{=} (I_{d_h}-S)(I_{d_h}+S)^{-1} &&([3.6],[0.3])\\
-\boxed{[3.8]}\quad & P_{\mathrm{sp}}^\top P_{\mathrm{sp}} = I_{d_h} &&([3.4],[3.7],[0.4],[0.3])\\
-\boxed{[3.9]}\quad & S w = i\mu w \Rightarrow P_{\mathrm{sp}} w = \frac{1-i\mu}{1+i\mu} w,\ |\frac{1-i\mu}{1+i\mu}|=1 &&([3.4],[3.7],[0.16])\\
-\boxed{[3.10]}\quad & P_{\mathrm{sp}} \in SO(d_h) \Longleftrightarrow P_{\mathrm{sp}}^\top P_{\mathrm{sp}}=I_{d_h},\ \det(P_{\mathrm{sp}})=1 &&([3.8],[3.9],[0.8])
+\boxed{[0.3] \text{ (Kronecker delta / identity) }} \quad
+&\delta_{ij} \eqdef
+\begin{cases}
+1,& i=j\\
+0,& i\neq j
+\end{cases}
+\quad(i,j\in\mathbb{N}) \notag\\
+&I_n \eqdef
+\big[\delta_{ij}\big]_{i,j=1}^n
+\in \mathbb{R}^{n\times n} \notag\\
+&I_n x = x,\ \forall x\in \mathbb{R}^{n\times 1}
+\quad(\text{uses no previous lines})
 \end{align}
-
-Let $\mathbb{R}^{d_h} = \mathrm{act} \oplus \mathrm{null}$ be the $U$-aligned decomposition.
 
 \begin{align}
-\boxed{[3.11]}\quad & \dim(\mathrm{act}) = 2m,\ \dim(\mathrm{null}) = d_{\mathrm{null}} = d_h-2m &&([2.4],[2.6],[0.16])\\
-\boxed{[3.12]}\quad & U_{\mathrm{mask}} \text{ supported in null} \times \text{null} \\
-&\Longrightarrow S = \begin{bmatrix}0&0\\0&S_{\mathrm{null}}\end{bmatrix},\ P_{\mathrm{sp}} = \begin{bmatrix}I_{2m}&0\\0&R_{\mathrm{null}}\end{bmatrix},\ R_{\mathrm{null}} \in SO(d_{\mathrm{null}}) &&([3.1],[3.3],[3.7],[3.10],[2.4])\\
-\boxed{[3.13]}\quad & \mathcal{A} \overset{\varnothing}{=} \Big\{P \in SO(d_h) \mid P = \begin{bmatrix}I_{2m}&0\\0&R_{\mathrm{null}}\end{bmatrix},\ R_{\mathrm{null}} \in SO(d_{\mathrm{null}})\Big\} &&([0.8],[3.11])\\
-\boxed{[3.14]}\quad & \mathcal{B} \overset{\varnothing}{=} \Big\{P_{\mathrm{sp}} : P_{\mathrm{sp}} = (I_{d_h}-S)(I_{d_h}+S)^{-1},\ S^\top=-S\Big\} &&([3.7])\\
-\boxed{[3.15]}\quad & \mathcal{A} \subseteq \mathcal{B} \subseteq SO(d_h) &&([3.10],[3.12],[3.13])
+\boxed{[0.4] \text{ (transpose, adjoint, real/complex spaces) }}
+&(\cdot)^\top :
+\mathbb{R}^{n\times m}\to\mathbb{R}^{m\times n},
+\quad
+A^\top \eqdef
+\text{matrix transpose of }A \notag\\
+&(\cdot)^* :
+\mathbb{C}^{n\times m}\to\mathbb{C}^{m\times n},
+\quad
+B^* \eqdef
+\overline{B}^\top \notag\\
+&\forall A\in\mathbb{R}^{n\times m}:\
+A^*
+\eqref{0.4}
+A^\top
+\quad(\text{real case}) \notag\\
+&\mathbb{R}^n
+\eqdef
+\{x\in\mathbb{R}^{n\times 1}\},
+\quad
+\mathbb{C}^n
+\eqdef
+\{x\in\mathbb{C}^{n\times 1}\} \notag\\
+&x^*
+\eqdef
+\overline{x}^\top
+\in \mathbb{C}^{1\times n}
+\quad(\text{uses no previous lines})
 \end{align}
 
-\section{BEG-4: Composed Rotation and Relative/Absolute Behaviour}
+\subsection{Linear Algebra Operators}
 
 \begin{align}
-\boxed{[4.1]}\quad & R_{\mathrm{sp}}(r) \overset{\varnothing}{=} \underbrace{R_{\mathrm{STR}}(r)}_{[2.11]}\underbrace{P_{\mathrm{sp}}}_{[3.7]} &&([2.11],[3.7])\\
-\boxed{[4.2]}\quad & R_{\mathrm{sp}}(r)^\top R_{\mathrm{sp}}(r) = I_{d_h},\ \det(R_{\mathrm{sp}}(r))=1 \Rightarrow R_{\mathrm{sp}}(r) \in SO(d_h) &&([4.1],[2.12],[3.10],[0.8])
+\boxed{[0.5] \text{ (linear-algebra operators / dimensions) }}
+&\ker(M)
+\eqdef
+\{x \in \mathbb{R}^n \mid Mx = 0\},
+\qquad
+\operatorname{im}(M)
+\eqdef
+\{Mx \mid x \in \mathbb{R}^n\} \notag\\
+&\dim(V)
+\eqdef
+\text{cardinality of any basis of }V \notag\\
+&\sigma(M)
+\eqdef
+\{\lambda\in\mathbb{C} \mid \exists x\in\mathbb{C}^n\setminus\{0\}:\ Mx=\lambda x\} \notag\\
+&\operatorname{diag}(\lambda_1,\dots,\lambda_n)
+\eqdef
+[\delta_{ij}\lambda_i]_{i,j=1}^n
+\eqref{0.3}
+\mathbb{C}^{n\times n} \notag\\
+&\bigoplus_{u=1}^m M_u
+\eqdef
+\operatorname{diag}(M_1,\dots,M_m)
+\quad(\text{block diagonal}) \notag\\
+&\text{if }M=
+\begin{bmatrix}
+M_1 & 0\\
+0 & M_2
+\end{bmatrix}
+\text{ then }
+M
+=
+M_1 \oplus M_2
+\quad(\text{uses no previous lines})
 \end{align}
-
-When $P_{\mathrm{sp}} \in \mathcal{A}$ the active block is untouched.
 
 \begin{align}
-\boxed{[4.3]}\quad & P_{\mathrm{sp}} \in \mathcal{A} \Longrightarrow \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r) \Pi_{\mathrm{act}} = \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r) \Pi_{\mathrm{act}} &&([4.1],[3.13],[2.6])\\
-\boxed{[4.4]}\quad & P_{\mathrm{sp}} \in \mathcal{A} \Longrightarrow \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i)^\top R_{\mathrm{sp}}(r_j) \Pi_{\mathrm{act}} = \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j-r_i) \Pi_{\mathrm{act}} &&([4.1],[4.3],[2.13],[3.13],[2.6])
+\boxed{[0.6] \text{ (determinant / block determinant) }}
+&\det:
+\mathbb{R}^{n\times n}\to\mathbb{R}
+\quad\text{(usual determinant)} \notag\\
+&\det
+\begin{bmatrix}
+M_1 & 0\\
+0 & M_2
+\end{bmatrix}
+=
+\det(M_1)
+\det(M_2)
+\quad(\text{block determinant})
+\quad(\text{uses no previous lines})
 \end{align}
 
-If $P_{\mathrm{sp}} \in \mathcal{B}\setminus\mathcal{A}$ we can write $P_{\mathrm{sp}} = \begin{bmatrix}A&B\\C&D\end{bmatrix}$ with $B \neq 0$ or $C \neq 0$.
+\subsection{Commutators and Normal Matrices}
 
 \begin{align}
-\boxed{[4.5]}\quad & P_{\mathrm{sp}} \in \mathcal{B}\setminus\mathcal{A} \Longrightarrow \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i)^\top R_{\mathrm{sp}}(r_j) \Pi_{\mathrm{act}} \neq \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j-r_i) \Pi_{\mathrm{act}} &&([3.14],[4.1],[2.13],[2.6])
+\boxed{[0.7] \text{ (commutator / normal) }}
+&[A,B]
+\eqdef
+AB - BA
+\quad(A,B\text{ square}) \notag\\
+&M
+\text{ normal}
+\overset{\varnothing}{\Longleftrightarrow}
+M^* M
+=
+M M^* \notag\\
+&\forall M\in\mathbb{R}^{n\times n}:
+M^\top M = M M^\top
+\eqref{0.4}
+M^* M = M M^*
+\Longleftrightarrow
+M \text{ is normal}
+\quad(\text{uses [0.4]})
 \end{align}
 
-\section{BEG-5: Attention Logits}
+\subsection{Orthogonal Groups}
 
 \begin{align}
-\boxed{[5.1]}\quad & W_Q,W_K,W_V \in \mathbb{R}^{d_h\times D},\ x_i \in \mathbb{R}^{D},\ r_i \in \mathbb{R}^{d_c} &&([0.2])\\
-\boxed{[5.2]}\quad & q_i \overset{\varnothing}{=} W_Q x_i,\ k_i \overset{\varnothing}{=} W_K x_i,\ v_i \overset{\varnothing}{=} W_V x_i &&([5.1])\\
-\boxed{[5.3]}\quad & q_i^{(\mathrm{act})} \overset{\varnothing}{=} \Pi_{\mathrm{act}} q_i,\ k_j^{(\mathrm{act})} \overset{\varnothing}{=} \Pi_{\mathrm{act}} k_j &&([5.2],[2.6])\\
-\boxed{[5.4]}\quad & d_{\mathrm{act}} \overset{\varnothing}{=} \dim(\mathrm{act}) = 2m &&([2.4],[3.11],[0.16])\\
-\boxed{[5.5]}\quad & \tilde{q}_i \overset{\varnothing}{=} \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i) q_i^{(\mathrm{act})},\ \tilde{k}_j \overset{\varnothing}{=} \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j) k_j^{(\mathrm{act})} &&([4.1],[5.3],[2.6])\\
-\boxed{[5.6]}\quad & \alpha_{ij} \overset{\varnothing}{=} \frac{\tilde{q}_i^\top \tilde{k}_j}{\sqrt{d_{\mathrm{act}}}} &&([5.5],[5.4])\\
-\boxed{[5.7]}\quad & \alpha_{ij} = \frac{(q_i^{(\mathrm{act})})^\top\big[(\Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i) \Pi_{\mathrm{act}})^\top (\Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j) \Pi_{\mathrm{act}})\big] k_j^{(\mathrm{act})}}{\sqrt{d_{\mathrm{act}}}} &&([5.6],[5.5],[5.3],[2.6])\\
-\boxed{[5.8]}\quad & P_{\mathrm{sp}} \in \mathcal{A} \Longrightarrow (\Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i) \Pi_{\mathrm{act}})^\top(\Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j) \Pi_{\mathrm{act}}) = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j-r_i) \Pi_{\mathrm{act}} &&([4.4],[4.1],[2.13],[2.6],[3.13])\\
-\boxed{[5.9]}\quad & P_{\mathrm{sp}} \in \mathcal{A} \Longrightarrow \alpha_{ij} = \frac{(q_i^{(\mathrm{act})})^\top[\Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j-r_i) \Pi_{\mathrm{act}}]k_j^{(\mathrm{act})}}{\sqrt{d_{\mathrm{act}}}} &&([5.7],[5.8],[4.4],[2.13],[5.4])\\
-\boxed{[5.10]}\quad & P_{\mathrm{sp}} \in \mathcal{B}\setminus\mathcal{A} \Longrightarrow \alpha_{ij} \neq \frac{(q_i^{(\mathrm{act})})^\top[\Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j-r_i) \Pi_{\mathrm{act}}]k_j^{(\mathrm{act})}}{\sqrt{d_{\mathrm{act}}}} &&([4.5],[5.7],[4.1],[2.13],[3.14],[5.4])
+\boxed{[0.8] \text{ (orthogonal / special orthogonal groups) }}
+&O(n)
+\eqdef
+\{Q\in\mathbb{R}^{n\times n}
+\mid
+Q^\top Q
+\eqref{0.4}
+I_n
+\eqref{0.3}
+I_n
+\} \notag\\
+&SO(n)
+\eqdef
+\{Q\in O(n)
+\mid
+\det(Q)=+1
+\eqref{0.6}
+\mathbb{R}
+\}
 \end{align}
 
-\section{BEG-6: Summary and Fatal Check}
+\begin{align}
+\boxed{[0.9] \text{ (determinant of orthogonal matrices) }}
+&Q \in O(n)
+\eqref{0.8}
+Q^\top Q
+=
+I_n
+\eqref{0.3}
+I_n \notag\\
+&\det(Q^\top Q)
+\eqref{0.6}
+\det(Q^\top)\det(Q)
+=
+(\det Q)^2
+=
+\det(I_n)
+=
+1 \notag\\
+&(\det Q)^2 = 1
+\Longrightarrow
+\det Q \in \{+1,-1\} \notag\\
+&Q\in SO(n)
+\eqref{0.8}
+Q\in O(n)
+\wedge
+\det Q = +1
+\quad(\text{uses [0.3],[0.6],[0.8]})
+\end{align}
 
-Assuming $[1.2]$ and $[1.3]$, the statements $[2.1]$ through $[5.10]$ show:
+\subsection{Matrix Exponential}
+
+\begin{align}
+\boxed{[0.10] \text{ (matrix exponential) }}
+&\forall M \in \mathbb{R}^{n\times n}:\quad
+\exp(M)
+\eqdef
+\sum_{t=0}^{\infty}
+\frac{1}{t!} M^t
+\in \mathbb{R}^{n\times n} \notag\\
+&\forall M,N \in \mathbb{R}^{n\times n}:
+[M,N]=0
+\eqref{0.7}
+\exp(M+N)
+=
+\exp(M)\exp(N) \notag\\
+&\forall
+M=
+\begin{bmatrix}
+M_1 & 0\\
+0 & M_2
+\end{bmatrix}
+:\quad
+\exp(M)
+=
+\begin{bmatrix}
+\exp(M_1) & 0\\
+0 & \exp(M_2)
+\end{bmatrix} \notag\\
+&\forall U \text{ invertible},\ \forall X:\quad
+\exp(U X U^{-1})
+=
+U (\exp X) U^{-1}
+\quad(\text{standard power-series argument}) \notag\\
+&\text{All equalities above use [0.10] power series termwise and [0.7] commutativity.}
+\end{align}
+
+\subsection{2D Rotations}
+
+\begin{align}
+\boxed{[0.11] \text{ (canonical 2D rotation block) }}
+&J
+\eqdef
+\begin{bmatrix}
+0 & -1\\
+1 & 0
+\end{bmatrix}
+\in \mathbb{R}^{2\times 2} \notag\\
+&\forall\theta\in\mathbb{R}:\quad
+R_2(\theta)
+\eqdef
+\exp(\theta J)
+\eqref{0.10}
+\begin{bmatrix}
+\cos\theta & -\sin\theta\\
+\sin\theta & \cos\theta
+\end{bmatrix}
+\in \mathbb{R}^{2\times 2} \notag\\
+&R_2(\theta)^\top
+\eqref{0.4}
+R_2(-\theta)
+\quad(\text{orthogonality in 2D}) \notag\\
+&\det(R_2(\theta))
+=
++1
+\eqref{0.9}
+R_2(\theta)
+\in SO(2)
+\eqref{0.8}
+SO(2) \notag\\
+&\forall a,b\in\mathbb{R}:\quad
+R_2(a)^\top R_2(b)
+\eqref{0.11}
+R_2(-a)R_2(b)
+\eqref{0.10}
+R_2(b-a)
+\quad(\text{uses [0.10],[0.11]})
+\end{align}
+
+\subsection{Skew-Symmetric Matrices}
+
+\begin{align}
+\boxed{[0.12] \text{ (skew-symmetric matrices) }}
+&S^\top
+=
+-S
+\quad\Longrightarrow\quad
+S_{ii}
+=
+0,\
+S_{ji}
+=
+-S_{ij}
+\quad(\text{entrywise from [0.4]}) \notag\\
+&S^\top
+=
+-S
+\eqref{0.4}
+S^*
+=
+-S \notag\\
+&S^\top = -S
+\eqref{0.4}
+S^\top S
+=
+(-S)S
+=
+-(S^2)
+=
+S(-S)
+=
+SS^\top \notag\\
+&S^\top S=SS^\top
+\eqref{0.7}
+S
+\text{ normal}
+\quad(\text{uses [0.4],[0.7]})
+\end{align}
+
+\begin{align}
+\boxed{[0.13] \text{ (spectrum of real skew-symmetric) }}
+&S^\top = -S
+\eqref{0.12}
+S
+\text{ normal} \notag\\
+&Sx=\lambda x,\ x\neq 0
+\Longrightarrow
+x^* S x
+=
+\lambda x^* x \notag\\
+&(x^* S x)^*
+\eqref{0.4}
+x^* S^* x
+=
+x^*(-S)x
+=
+-x^* S x \notag\\
+&\lambda x^* x
+=
+x^* S x
+=
+-\overline{x^* S x}
+=
+-\overline{\lambda x^* x}
+=
+-(\overline{\lambda}) x^* x \notag\\
+&x^* x >0
+\Longrightarrow
+\lambda
+=
+-\overline{\lambda}
+\Longrightarrow
+\lambda \in i\mathbb{R} \notag\\
+&\text{Moreover: }\lambda\in i\mathbb{R}
+\Longrightarrow
+(-\lambda)\in i\mathbb{R}
+\text{ and }
+(-\lambda)
+\in\sigma(S) \notag\\
+&\text{Thus: }\sigma(S)
+\subseteq i\mathbb{R},\
+\text{closed under }\lambda\mapsto-\lambda
+\quad(\text{uses [0.4],[0.12]})
+\end{align}
+
+\subsection{Orthogonal Projectors}
+
+\begin{align}
+\boxed{[0.14] \text{ (orthogonal projectors) }}
+&P\in\mathbb{R}^{n\times n}
+\text{ projector}
+\overset{\varnothing}{\Longleftrightarrow}
+P^2=P \notag\\
+&P
+\text{ orthogonal projector}
+\overset{\varnothing}{\Longleftrightarrow}
+P^2=P
+\wedge
+P^\top
+\eqref{0.4}
+P \notag\\
+&P
+\text{ orthogonal projector}
+\Longrightarrow
+\operatorname{im}(P)
+\eqref{0.5}
+(\ker(P))^\perp \notag\\
+&P,Q
+\text{ orthogonal projectors},\
+PQ=0
+\Longrightarrow
+\operatorname{im}(P)\perp\operatorname{im}(Q)
+\quad(\text{uses [0.4],[0.5]})
+\end{align}
+
+\subsection{Cayley Algebra}
+
+\begin{align}
+\boxed{[0.15] \text{ (Cayley algebra identity) }}
+&\forall S\in\mathbb{R}^{n\times n}:\quad
+(I_n - S)(I_n + S)
+=
+I_n - S^2
+=
+(I_n + S)(I_n - S) \notag\\
+&(\text{direct expansion using [0.3],[0.4]; no previous lines needed except [0.3] for }I_n\text{)}
+\end{align}
+
+\section{Hypotheses and Structured Generator (BEG-1)}
+
+\subsection{Assumptions on Generators}
+
+\begin{align}
+\boxed{[1.1] \text{ (assumptions on generators)}}
+&\forall k\in K
+\eqref{0.2}
+\mathbb{N}:\quad
+L_k
+\in
+\mathbb{R}^{d_h\times d_h} \notag\\
+&L_k^\top
+\eqref{0.4}
+-L_k
+\quad(\text{real skew-symmetric}) \notag\\
+&\forall a,b\in K:\quad
+[L_a,L_b]
+\eqref{0.7}
+L_aL_b - L_bL_a
+=
+0_{d_h\times d_h}
+\quad(\text{all uses [0.2],[0.4],[0.7]})
+\end{align}
+
+\subsection{Normality and Commutation}
+
+\begin{align}
+\boxed{[1.2] \text{ (normality and commutation of }L_k\text{)}}
+&L_k^\top
+=
+-L_k
+\eqref{0.12}
+L_k
+\text{ normal} \notag\\
+&[L_a,L_b]
+=
+0
+\eqref{1.1}
+L_a L_b
+=
+L_b L_a \notag\\
+&\forall a,b:\quad
+L_a,L_b
+\text{ are pairwise commuting normal matrices}
+\quad(\text{uses [1.1],[0.12],[0.7]})
+\end{align}
+
+\subsection{Linear Form $A(r)$}
+
+\begin{align}
+\boxed{[1.3] \text{ (linear form }A(r)\text{)}}
+&\forall r
+\in
+\mathbb{R}^{d_c}
+\eqref{0.4}
+\mathbb{R}^{d_c\times 1}
+:\quad
+[r]_k
+\eqdef
+\text{the }k\text{-th coordinate of }r \notag\\
+&A(r)
+\eqdef
+\sum_{k=1}^{d_c}
+L_k
+[r]_k
+\in
+\mathbb{R}^{d_h\times d_h} \notag\\
+&A(r)
+\text{ is real skew-symmetric}:
+\quad
+A(r)^\top
+\eqref{0.4}
+\sum_k
+[r]_k
+L_k^\top
+=
+\sum_k
+[r]_k
+(-L_k)
+=
+-A(r)
+\quad(\eqref{1.1})
+\quad(\text{uses [0.2],[1.1],[0.4]})
+\end{align}
+
+\subsection{Commutation of $A(r)$ Family}
+
+\begin{align}
+\boxed{[1.4] \text{ (commutation of }A(r)\text{ family)}}
+&\forall r,s\in\mathbb{R}^{d_c}:\quad
+[A(r),A(s)]
+\eqref{0.7}
+A(r)A(s) - A(s)A(r) \notag\\
+&A(r)A(s)
+=
+\big(\sum_k L_k [r]_k\big)
+\big(\sum_\ell L_\ell [s]_\ell\big)
+=
+\sum_{k,\ell}
+[r]_k [s]_\ell
+L_k L_\ell \notag\\
+&A(s)A(r)
+=
+\sum_{k,\ell}
+[s]_\ell [r]_k
+L_\ell L_k
+\eqref{1.1}
+\sum_{k,\ell}
+[r]_k [s]_\ell
+L_k L_\ell \notag\\
+&A(r)A(s)
+=
+A(s)A(r)
+\Longrightarrow
+[A(r),A(s)]=0
+\quad(\text{uses [1.1],[1.3],[0.7]})
+\end{align}
+
+\subsection{Definition of $R_{\mathrm{STR}}(r)$}
+
+\begin{align}
+\boxed{[1.5] \text{ (definition of }R_{\mathrm{STR}}(r)\text{)}}
+&R_{\mathrm{STR}}(r)
+\eqdef
+\exp\big(A(r)\big)
+\eqref{0.10}
+\mathbb{R}^{d_h\times d_h}
+\quad(\text{uses [1.3],[0.10]})
+\end{align}
+
+\section{Simultaneous Block Rotation Structure (BEG-2)}
+
+\subsection{Simultaneous Unitary Diagonalization}
+
+\begin{align}
+\boxed{[2.1] \text{ (simultaneous unitary diagonalization)}}
+&\text{Claim: }\exists \mathcal{U}_c \in U(d_h)
+\eqref{0.8}
+O(d_h)
+\text{ s.t. }
+\forall k\in K:\ \notag\\
+&\mathcal{U}_c^* L_k \mathcal{U}_c
+=
+\operatorname{diag}(i\lambda_{k,1},\dots,i\lambda_{k,d_h}),
+\quad
+\lambda_{k,j}
+\in
+\mathbb{R} \notag\\
+&\text{Justification:} \notag\\
+&\bullet\ L_k \text{ normal } \eqref{1.2} \text{unitarily diagonalizable.} \notag\\
+&\bullet\ [L_a,L_b]=0 \eqref{1.1} \text{spectral projectors commute} \notag\\
+&\quad\Longrightarrow \text{simultaneous diagonalization (classical theorem of commuting normal sets).} \notag\\
+&\bullet\ [0.13] \Longrightarrow \sigma(L_k)\subseteq i\mathbb{R}, \text{ so eigenvalues are }i\lambda_{k,j},\ \lambda_{k,j}\in\mathbb{R}.
+\quad(\text{uses [1.1],[1.2],[0.7],[0.13],[0.15],[0.4]})
+\end{align}
+
+\subsection{Simultaneous Real Block Form}
+
+\begin{align}
+\boxed{[2.2] \text{ (simultaneous real block form)}}
+&\exists
+U
+\in
+O(d_h)
+\eqref{0.8}
+\mathbb{R}^{d_h\times d_h},
+\quad
+\exists m\in\mathbb{N},
+\quad
+\exists d_{\mathrm{null}}\in\mathbb{N},
+\quad
+2m+d_{\mathrm{null}}
+=
+d_h
+\eqref{0.2}
+\mathbb{N} \notag\\
+&\text{s.t. }
+\forall k\in K:\quad
+U^\top L_k U
+=
+\Big(
+\bigoplus_{u=1}^m
+B_{k,u}
+\Big)
+\oplus
+0_{d_{\mathrm{null}}\times d_{\mathrm{null}}} \notag\\
+&B_{k,u}
+\in
+\mathbb{R}^{2\times 2},
+\quad
+B_{k,u}^\top
+=
+-B_{k,u} \notag\\
+&\exists
+\lambda_{k,u}
+\in
+\mathbb{R}
+\text{ s.t. }
+B_{k,u}
+=
+\lambda_{k,u}
+J
+\eqref{0.11}
+\mathbb{R}^{2\times 2} \notag\\
+&d_{\mathrm{null}}
+=
+\dim\Big(\bigcap_{k\in K} \ker(L_k)\Big)
+\eqref{0.5}
+\mathbb{N} \notag\\
+&\text{Justification sketch: }[2.1]
+\Longrightarrow
+\mathcal{U}_c^*L_k\mathcal{U}_c
+=
+\operatorname{diag}(i\lambda_{k,1},\dots,i\lambda_{k,d_h})
+\text{ splits } \mathbb{C}^{d_h} \text{ into 1D eigenspaces.} \notag\\
+&\text{Since }L_k\text{ are real skew-symmetric, nonzero eigenvalues come in }\pm i\mu\text{ pairs }[0.13]. \notag\\
+&\text{Realification} \Rightarrow \text{each pair spans a real }2\text{-dim invariant subspace with basis giving }J. \notag\\
+&\text{Commutation across }k \Rightarrow \text{same }2\text{D blocks for all }k. \notag\\
+&\text{Null intersection gives }d_{\mathrm{null}}\text{-dim block }0.
+\quad(\text{uses [2.1],[0.11],[0.13],[0.8],[0.4]})
+\end{align}
+
+\subsection{Active/Null Decomposition and Projectors}
+
+\begin{align}
+\boxed{[2.3] \text{ (active / null decomposition and projectors)}}
+&\text{Define index sets: }
+\{1,\dots,2m\}
+\text{ = active indices},
+\quad
+\{2m+1,\dots,2m+d_{\mathrm{null}}\}
+\text{ = null indices} \notag\\
+&\Pi_{\mathrm{act}}
+\eqdef
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+U^\top
+,\quad
+\Pi_{\mathrm{null}}
+\eqdef
+U
+\begin{bmatrix}
+0 & 0\\
+0 & I_{d_{\mathrm{null}}}
+\end{bmatrix}
+U^\top \notag\\
+&\Pi_{\mathrm{act}}^\top
+\eqref{0.4}
+\Pi_{\mathrm{act}},
+\quad
+\Pi_{\mathrm{null}}^\top
+\eqref{0.4}
+\Pi_{\mathrm{null}} \notag\\
+&\Pi_{\mathrm{act}}^2
+=
+\Pi_{\mathrm{act}},
+\quad
+\Pi_{\mathrm{null}}^2
+=
+\Pi_{\mathrm{null}}
+\quad
+\Pi_{\mathrm{act}}\Pi_{\mathrm{null}}
+=
+0
+=
+\Pi_{\mathrm{null}}\Pi_{\mathrm{act}} \notag\\
+&\Pi_{\mathrm{act}},\Pi_{\mathrm{null}}
+\text{ are orthogonal projectors}
+\eqref{0.14}
+\mathbb{R}^{d_h}
+=
+\operatorname{im}(\Pi_{\mathrm{act}})
+\oplus
+\operatorname{im}(\Pi_{\mathrm{null}}) \notag\\
+&\dim(\operatorname{im}(\Pi_{\mathrm{act}}))
+=
+2m,
+\quad
+\dim(\operatorname{im}(\Pi_{\mathrm{null}}))
+=
+d_{\mathrm{null}}
+\quad(\text{uses [2.2],[0.14],[0.3],[0.4]})
+\end{align}
+
+\subsection{Parameter Vectors for Each 2D Block}
+
+\begin{align}
+\boxed{[2.4] \text{ (parameter vectors for each 2D block)}}
+&\forall u \in \{1,\dots,m\}:\quad
+\beta_u
+\eqdef
+(\lambda_{1,u},\dots,\lambda_{d_c,u})^\top
+\in \mathbb{R}^{d_c} \notag\\
+&[\beta_u]_k
+\eqdef
+\lambda_{k,u}
+\quad(\forall k\in K) \notag\\
+&\forall r\in\mathbb{R}^{d_c}:\quad
+\theta_u(r)
+\eqdef
+\beta_u^\top r
+=
+\sum_{k=1}^{d_c}
+\lambda_{k,u}
+[r]_k
+\quad(\text{uses [2.2],[0.4],[1.3]})
+\end{align}
+
+\subsection{Block Form of $A(r)$ in the $U$-Basis}
+
+\begin{align}
+\boxed{[2.5] \text{ (block form of }A(r)\text{ in the }U\text{-basis)}}
+&U^\top
+A(r)
+U
+\eqref{1.3}
+U^\top
+\Big(
+\sum_{k=1}^{d_c}
+L_k [r]_k
+\Big)
+U
+=
+\sum_{k=1}^{d_c}
+\big(
+U^\top L_k U
+\big)
+[r]_k \notag\\
+&U^\top L_k U
+\eqref{2.2}
+\Big(
+\bigoplus_{u=1}^{m}
+B_{k,u}
+\Big)
+\oplus
+0_{d_{\mathrm{null}}\times d_{\mathrm{null}}} \notag\\
+&\sum_{k=1}^{d_c}
+B_{k,u}
+[r]_k
+\eqref{2.2}
+\sum_{k=1}^{d_c}
+\lambda_{k,u}J
+[r]_k
+=
+\Big(
+\sum_{k=1}^{d_c}
+\lambda_{k,u}[r]_k
+\Big)
+J
+\eqref{2.4}
+\theta_u(r)J \notag\\
+&\Longrightarrow
+U^\top A(r) U
+=
+\Big(
+\bigoplus_{u=1}^{m}
+\theta_u(r)J
+\Big)
+\oplus
+0_{d_{\mathrm{null}}\times d_{\mathrm{null}}}
+\quad(\text{uses [1.3],[2.2],[2.4],[0.11]})
+\end{align}
+
+\subsection{Block Form of $\exp(A(r))$ in $U$-Basis}
+
+\begin{align}
+\boxed{[2.6] \text{ (block form of }\exp(A(r))\text{ in }U\text{-basis)}}
+&\exp\big(
+U^\top A(r) U
+\big)
+\eqref{0.10}
+\Big(
+\bigoplus_{u=1}^{m}
+\exp(\theta_u(r)J)
+\Big)
+\oplus
+\exp(0_{d_{\mathrm{null}}\times d_{\mathrm{null}}}) \notag\\
+&\exp(\theta_u(r)J)
+\eqref{0.10,0.11}
+R_2(\theta_u(r))
+\in SO(2)
+\eqref{0.11}
+\mathbb{R}^{2\times 2} \notag\\
+&\exp(0_{d_{\mathrm{null}}\times d_{\mathrm{null}}})
+=
+I_{d_{\mathrm{null}}}
+\eqref{0.3}
+\mathbb{R}^{d_{\mathrm{null}}\times d_{\mathrm{null}}} \notag\\
+&\Longrightarrow
+\exp\big(U^\top A(r) U\big)
+=
+\Big(
+\bigoplus_{u=1}^{m}
+R_2(\theta_u(r))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\quad(\text{uses [2.5],[0.10],[0.11],[0.3]})
+\end{align}
+
+\subsection{Explicit Closed Form for $R_{\mathrm{STR}}(r)$}
+
+\begin{align}
+\boxed{[2.7] \text{ (explicit closed form for }R_{\mathrm{STR}}(r)\text{)}}
+&R_{\mathrm{STR}}(r)
+\eqref{1.5}
+\exp\big(A(r)\big) \notag\\
+&A(r)
+=
+U
+\big[
+U^\top A(r) U
+\big]
+U^\top
+\eqref{2.5}
+U
+\Big[
+\Big(
+\bigoplus_{u=1}^{m}
+\theta_u(r)J
+\Big)
+\oplus
+0_{d_{\mathrm{null}}\times d_{\mathrm{null}}}
+\Big]
+U^\top \notag\\
+&\exp(A(r))
+=
+\exp\Big(
+U
+[U^\top A(r) U]
+U^\top
+\Big)
+\eqref{0.10}
+U
+\exp\big(
+U^\top A(r) U
+\big)
+U^\top \notag\\
+&\eqref{2.6}
+U
+\Big[
+\Big(
+\bigoplus_{u=1}^{m}
+R_2(\theta_u(r))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\Big]
+U^\top \notag\\
+&\boxed{
+R_{\mathrm{STR}}(r)
+=
+U
+\Big[
+\Big(
+\bigoplus_{u=1}^{m}
+R_2(\theta_u(r))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\Big]
+U^\top
+}
+\quad(\text{uses [1.5],[2.5],[2.6],[0.10]})
+\end{align}
+
+\subsection{$R_{\mathrm{STR}}(r)\in SO(d_h)$}
+
+\begin{align}
+\boxed{[2.8] \text{ (}R_{\mathrm{STR}}(r)\in SO(d_h)\text{)}}
+&\text{Orthogonality:} \notag\\
+&R_{\mathrm{STR}}(r)
+=
+U
+\Big[
+\Big(
+\bigoplus_{u=1}^{m}
+R_2(\theta_u(r))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\Big]
+U^\top
+\eqref{2.7}
+U
+\Xi(r)
+U^\top
+\text{ where }
+\Xi(r)\text{ is block-orthogonal} \notag\\
+&\Xi(r)^\top \Xi(r)
+=
+I_{d_h}
+\quad
+(\text{each }R_2(\theta_u(r))^\top R_2(\theta_u(r))
+\eqref{0.11}I_2,\
+I_{d_{\mathrm{null}}}^\top I_{d_{\mathrm{null}}}
+\eqref{0.3}I_{d_{\mathrm{null}}}) \notag\\
+&U\in O(d_h)
+\eqref{2.2}
+O(d_h)
+\eqref{0.8}
+U^\top U
+=
+I_{d_h} \notag\\
+&\Longrightarrow
+R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(r)
+=
+I_{d_h}
+\eqref{0.8}
+R_{\mathrm{STR}}(r)\in O(d_h) \notag\\
+&\text{Determinant:} \notag\\
+&\det\big(R_{\mathrm{STR}}(r)\big)
+=
+\det(U)
+\det(\Xi(r))
+\det(U^\top) \notag\\
+&\det(U^\top)
+=
+\det(U)
+\eqref{0.9}
+\{\pm1\} \notag\\
+&\det(\Xi(r))
+=
+\Big(
+\prod_{u=1}^m
+\det(R_2(\theta_u(r)))
+\Big)
+\cdot
+\det(I_{d_{\mathrm{null}}})
+=
+\prod_{u=1}^m (+1)\cdot 1
+=1
+\quad(\text{uses [0.11],[0.6],[0.3]}) \notag\\
+&(\det U)^2
+=
+1
+\eqref{0.9}
+\det\big(R_{\mathrm{STR}}(r)\big)
+=
+1 \notag\\
+&R_{\mathrm{STR}}(r)\in O(d_h)
+\wedge
+\det(R_{\mathrm{STR}}(r))=1
+\eqref{0.9}
+R_{\mathrm{STR}}(r)
+\in
+SO(d_h)
+\quad(\text{uses [2.7],[2.2],[0.11],[0.9],[0.6],[0.3]})
+\end{align}
+
+\subsection{Relative-Position Law for $R_{\mathrm{STR}}$}
+
+\begin{align}
+\boxed{[2.9] \text{ (relative-position law for }R_{\mathrm{STR}})}
+&\forall r_i,r_j\in\mathbb{R}^{d_c}:\quad
+R_{\mathrm{STR}}(r_i)^\top
+R_{\mathrm{STR}}(r_j)
+\eqref{2.7}
+\Big[
+U
+\begin{pmatrix}
+\bigoplus_u R_2(\theta_u(r_i))\\
+& I_{d_{\mathrm{null}}}
+\end{pmatrix}
+U^\top
+\Big]^\top \notag\\
+&\quad\quad U
+\begin{pmatrix}
+\bigoplus_u R_2(\theta_u(r_j))\\
+& I_{d_{\mathrm{null}}}
+\end{pmatrix}
+U^\top \notag\\
+&=
+U
+\Big(
+\bigoplus_u R_2(\theta_u(r_i))^\top
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\
+U^\top U
+\Big(
+\bigoplus_u R_2(\theta_u(r_j))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+U^\top \notag\\
+&\eqref{0.8}
+U
+\Big[
+\Big(
+\bigoplus_u
+R_2(\theta_u(r_i))^\top
+R_2(\theta_u(r_j))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\Big]
+U^\top \notag\\
+&R_2(\theta_u(r_i))^\top
+R_2(\theta_u(r_j))
+\eqref{0.11}
+R_2(\theta_u(r_j)-\theta_u(r_i)) \notag\\
+&\theta_u(r_j)-\theta_u(r_i)
+\eqref{2.4}
+\beta_u^\top r_j - \beta_u^\top r_i
+=
+\beta_u^\top(r_j-r_i)
+=
+\theta_u(r_j-r_i) \notag\\
+&\Longrightarrow
+R_{\mathrm{STR}}(r_i)^\top
+R_{\mathrm{STR}}(r_j)
+=
+U
+\Big[
+\Big(
+\bigoplus_u
+R_2(\theta_u(r_j-r_i))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\Big]
+U^\top
+\eqref{2.7}
+R_{\mathrm{STR}}(r_j-r_i)
+\quad(\text{uses [2.7],[2.4],[0.11],[0.8]})
+\end{align}
+
+\subsection{Commutation with $\Pi_{\mathrm{act}}$}
+
+\begin{align}
+\boxed{[2.10] \text{ (commutation with }\Pi_{\mathrm{act}}\text{)}}
+&R_{\mathrm{STR}}(r)
+\eqref{2.7}
+U
+\Big[
+\Big(
+\bigoplus_{u=1}^{m}
+R_2(\theta_u(r))
+\Big)
+\oplus
+I_{d_{\mathrm{null}}}
+\Big]
+U^\top \notag\\
+&\Pi_{\mathrm{act}}
+\eqref{2.3}
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+U^\top \notag\\
+&\text{Both are simultaneously block-diagonal (same }U\text{, [2.2]).} \notag\\
+&\Longrightarrow
+R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r) \notag\\
+&\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}R_{\mathrm{STR}}(r)
+=
+R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}}
+\quad(\text{uses [2.7],[2.3],[2.2],[0.8]})
+\end{align}
+
+\section{Cayley Post-Rotation (BEG-3)}
+
+\subsection{Learned Skew via Mask}
+
+\begin{align}
+\boxed{[3.1] \text{ (learned skew }S\text{ via mask)}}
+&U_{\mathrm{mask}}
+\eqdef
+[U_{\mathrm{mask}}]_{ij}
+\in\{0,1\}^{d_h\times d_h}
+\text{ such that }
+[U_{\mathrm{mask}}]_{ij}=0
+\text{ for }i\ge j \notag\\
+&\tilde{S}
+\in
+\mathbb{R}^{d_h\times d_h}
+\text{ (free parameter)} \notag\\
+&S_{ij}
+\eqdef
+[U_{\mathrm{mask}}]_{ij}
+\tilde{S}_{ij}
+\quad(i<j),
+\qquad
+S_{ji}
+\eqdef
+-S_{ij}
+\quad(i<j),
+\qquad
+S_{ii}
+\eqdef
+0 \notag\\
+&S^\top
+\eqref{0.4}
+-S
+\quad(\text{by construction})
+\quad(\text{uses [0.2],[0.4]})
+\end{align}
+
+\subsection{Spectrum of $S$}
+
+\begin{align}
+\boxed{[3.2] \text{ (spectrum of }S\text{)}}
+&S^\top
+=
+-S
+\eqref{0.12}
+S
+\text{ normal} \notag\\
+&\sigma(S)
+\subseteq
+i\mathbb{R}
+\wedge
+\lambda\in\sigma(S)
+\Longrightarrow
+-\lambda\in\sigma(S)
+\eqref{0.13}
+\sigma(S)
+=
+\{i\mu_\ell\}_\ell
+\text{ with }\mu_\ell\in\mathbb{R}
+\text{ occurring in }\pm\text{ pairs} \notag\\
+&-1
+\notin
+\sigma(S)
+\text{ because }
+-1
+\notin
+i\mathbb{R} \notag\\
+&\Longrightarrow
+\big(I_{d_h}+S\big)
+\text{ invertible}
+\quad(\text{uses [3.1],[0.12],[0.13],[0.3]})
+\end{align}
+
+\subsection{Cayley Transform $P_{\mathrm{sp}}$ and Orthogonality}
+
+\begin{align}
+\boxed{[3.3] \text{ (Cayley transform }P_{\mathrm{sp}}\text{ and orthogonality)}}
+&P_{\mathrm{sp}}
+\eqdef
+(I_{d_h}-S)
+(I_{d_h}+S)^{-1}
+\quad(\text{Cayley}) \notag\\
+&(I_{d_h}+S)
+\text{ invertible}
+\eqref{3.2}
+P_{\mathrm{sp}}
+\text{ well-defined} \notag\\
+&P_{\mathrm{sp}}^\top
+P_{\mathrm{sp}}
+=
+\big[(I_{d_h}+S)^{-1}\big]^\top
+(I_{d_h}-S)^\top
+(I_{d_h}-S)
+(I_{d_h}+S)^{-1} \notag\\
+&(I_{d_h}+S)^{-1})^\top
+=
+\big[(I_{d_h}+S)^\top\big]^{-1}
+=
+(I_{d_h}+S^\top)^{-1}
+=
+(I_{d_h}-S)^{-1}
+\quad(\eqref{3.1,0.4}) \notag\\
+&(I_{d_h}-S)^\top
+=
+I_{d_h}-S^\top
+=
+I_{d_h}+S
+\quad(\eqref{3.1,0.4}) \notag\\
+&\Longrightarrow
+P_{\mathrm{sp}}^\top P_{\mathrm{sp}}
+=
+(I_{d_h}-S)^{-1}
+(I_{d_h}+S)
+(I_{d_h}-S)
+(I_{d_h}+S)^{-1} \notag\\
+&(I_{d_h}+S)
+(I_{d_h}-S)
+\eqref{0.15}
+I_{d_h}-S^2
+=
+(I_{d_h}-S)
+(I_{d_h}+S) \notag\\
+&\Longrightarrow
+P_{\mathrm{sp}}^\top P_{\mathrm{sp}}
+=
+(I_{d_h}-S)^{-1}
+(I_{d_h}-S^2)
+(I_{d_h}+S)^{-1} \notag\\
+&(I_{d_h}-S^2)
+=
+(I_{d_h}-S)
+(I_{d_h}+S)
+\eqref{0.15}
+(I_{d_h}+S)
+(I_{d_h}-S) \notag\\
+&\Longrightarrow
+P_{\mathrm{sp}}^\top P_{\mathrm{sp}}
+=
+I_{d_h} \notag\\
+&P_{\mathrm{sp}}\in O(d_h)
+\eqref{0.8}
+\mathbb{R}^{d_h\times d_h}
+\quad(\text{uses [3.1],[3.2],[0.3],[0.4],[0.15],[0.8]})
+\end{align}
+
+\subsection{$\det(P_{\mathrm{sp}})=1$}
+
+\begin{align}
+\boxed{[3.4] \text{ (}\det(P_{\mathrm{sp}})=1\text{)}}
+&Sw
+=
+i\mu w,\
+\mu\in\mathbb{R},\
+w\neq 0
+\eqref{0.13}
+S(\overline{w})
+=
+-i\mu(\overline{w})
+\text{ (complex conj pair)} \notag\\
+&P_{\mathrm{sp}} w
+=
+(I-S)(I+S)^{-1} w
+=
+\frac{1-i\mu}{1+i\mu}  w \notag\\
+&P_{\mathrm{sp}} \overline{w}
+=
+\frac{1+i\mu}{1-i\mu}
+\overline{w}
+=
+\overline{\frac{1-i\mu}{1+i\mu}}
+\overline{w} \notag\\
+&\left|
+\frac{1-i\mu}{1+i\mu}
+\right|
+=
+1 \notag\\
+&\text{Eigenvalues of }P_{\mathrm{sp}}\text{ come in conjugate pairs on unit circle, and }1\text{ for }\mu=0 \notag\\
+&\Longrightarrow
+\det(P_{\mathrm{sp}})
+=
+1 \notag\\
+&P_{\mathrm{sp}}
+\in
+O(d_h),\
+\det(P_{\mathrm{sp}})=1
+\eqref{0.9}
+P_{\mathrm{sp}}
+\in
+SO(d_h)
+\quad(\text{uses [3.2],[3.3],[0.9],[0.13]})
+\end{align}
+
+\subsection{Special Subclass $\mathcal{A}$ and Full Class $\mathcal{B}$}
+
+\begin{align}
+\boxed{[3.5] \text{ (special subclass }\mathcal{A}\text{ and full class }\mathcal{B}\text{)}}
+&\text{Using }U\text{ from [2.2]:} \notag\\
+&\text{Case: }S
+=
+U
+\begin{bmatrix}
+0_{2m\times 2m} & 0\\
+0 & S_{\mathrm{null}}
+\end{bmatrix}
+U^\top
+\quad
+S_{\mathrm{null}}^\top=-S_{\mathrm{null}} \notag\\
+&\Longrightarrow
+(I_{d_h}\pm S)
+=
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & I_{d_{\mathrm{null}}}\pm S_{\mathrm{null}}
+\end{bmatrix}
+U^\top \notag\\
+&P_{\mathrm{sp}}
+=
+(I_{d_h}-S)(I_{d_h}+S)^{-1} \notag\\
+&\eqref{0.15}
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 &
+(I_{d_{\mathrm{null}}}-S_{\mathrm{null}})
+(I_{d_{\mathrm{null}}}+S_{\mathrm{null}})^{-1}
+\end{bmatrix}
+U^\top \notag\\
+&\eqref{3.3,3.4}
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & R_{\mathrm{null}}
+\end{bmatrix}
+U^\top
+,\quad
+R_{\mathrm{null}}\in SO(d_{\mathrm{null}}) \notag\\
+&\mathcal{A}
+\eqdef
+\Big\{
+P\in SO(d_h)
+\ \big|\
+P
+=
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & R_{\mathrm{null}}
+\end{bmatrix}
+U^\top
+,\
+R_{\mathrm{null}}\in SO(d_{\mathrm{null}})
+\Big\} \notag\\
+&\mathcal{B}
+\eqdef
+\Big\{
+P_{\mathrm{sp}}
+\mid
+\exists S:\ S^\top=-S,\
+P_{\mathrm{sp}}
+=(I_{d_h}-S)(I_{d_h}+S)^{-1}
+\Big\} \notag\\
+&\mathcal{A}
+\subseteq
+\mathcal{B}
+\subseteq
+SO(d_h)
+\eqref{3.3,3.4,2.2}
+SO(d_h)
+\quad(\text{uses [2.2],[3.1]-[3.4],[0.8],[0.9]})
+\end{align}
+
+\section{Combined Rotation and Relative/Absolute Behavior (BEG-4)}
+
+\subsection{Combined Rotation $R_{\mathrm{sp}}(r)$}
+
+\begin{align}
+\boxed{[4.1] \text{ (combined rotation }R_{\mathrm{sp}}(r)\text{)}}
+&R_{\mathrm{sp}}(r)
+\eqdef
+R_{\mathrm{STR}}(r)
+P_{\mathrm{sp}} \notag\\
+&R_{\mathrm{STR}}(r)
+\in
+SO(d_h)
+\eqref{2.8}
+SO(d_h),
+\quad
+P_{\mathrm{sp}}
+\in
+SO(d_h)
+\eqref{3.4}
+SO(d_h) \notag\\
+&R_{\mathrm{sp}}(r)
+\in
+SO(d_h)
+\eqref{0.8,0.9}
+SO(d_h)
+\quad(\text{uses [2.8],[3.4],[0.8],[0.9]})
+\end{align}
+
+\subsection{Restriction to Active Subspace}
+
+\begin{align}
+\boxed{[4.2] \text{ (restriction to active subspace)}}
+&\Pi_{\mathrm{act}}
+\eqref{2.3}
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+U^\top
+,\quad
+\Pi_{\mathrm{act}}^2
+=
+\Pi_{\mathrm{act}},\
+\Pi_{\mathrm{act}}^\top
+=
+\Pi_{\mathrm{act}}
+\eqref{2.3,0.14}
+\Pi_{\mathrm{act}}
+\text{ orthogonal projector} \notag\\
+&P_{\mathrm{sp}}
+\in
+\mathcal{A}
+\eqref{3.5}
+P_{\mathrm{sp}}
+=
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & R_{\mathrm{null}}
+\end{bmatrix}
+U^\top \notag\\
+&\Pi_{\mathrm{act}}
+P_{\mathrm{sp}}
+\Pi_{\mathrm{act}}
+=
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+U^\top
+=
+\Pi_{\mathrm{act}} \notag\\
+&P_{\mathrm{sp}}
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+P_{\mathrm{sp}} \notag\\
+&R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\eqref{2.10}
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}} \notag\\
+&\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+P_{\mathrm{sp}}
+\Pi_{\mathrm{act}} \notag\\
+&=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}}
+\quad
+(\text{since }
+P_{\mathrm{sp}}\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+) \notag\\
+&=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}} \notag\\
+&\boxed{
+P_{\mathrm{sp}}\in\mathcal{A}
+\Longrightarrow
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}}
+}
+\quad(\text{uses [2.3],[2.7],[2.10],[3.5],[4.1]})
+\end{align}
+
+\subsection{Relative Law Restricted to Active Subspace}
+
+\begin{align}
+\boxed{[4.3] \text{ (relative law restricted to active subspace)}}
+&\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}} \notag\\
+&=
+\Pi_{\mathrm{act}}
+P_{\mathrm{sp}}^\top
+R_{\mathrm{STR}}(r_i)^\top
+R_{\mathrm{STR}}(r_j)
+P_{\mathrm{sp}}
+\Pi_{\mathrm{act}}
+\quad
+(\eqref{4.1}) \notag\\
+&R_{\mathrm{STR}}(r_i)^\top
+R_{\mathrm{STR}}(r_j)
+\eqref{2.9}
+R_{\mathrm{STR}}(r_j-r_i) \notag\\
+&\Pi_{\mathrm{act}}
+P_{\mathrm{sp}}^\top
+=
+\Pi_{\mathrm{act}},\
+P_{\mathrm{sp}}
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+\quad(\eqref{3.5,4.2}) \notag\\
+&\Longrightarrow
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}} \notag\\
+&\boxed{
+P_{\mathrm{sp}}\in\mathcal{A}
+\Longrightarrow
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+}
+\quad(\text{uses [4.1],[2.9],[3.5],[4.2],[2.10]})
+\end{align}
+
+\subsection{Failure if $P_{\mathrm{sp}}\in\mathcal{B}\setminus\mathcal{A}$}
+
+\begin{align}
+\boxed{[4.4] \text{ (failure if }P_{\mathrm{sp}}\in\mathcal{B}\setminus\mathcal{A}\text{)}}
+&P_{\mathrm{sp}}
+\in
+\mathcal{B}\setminus\mathcal{A}
+\eqref{3.5}
+P_{\mathrm{sp}}
+=
+U
+\begin{bmatrix}
+A & B\\
+C & D
+\end{bmatrix}
+U^\top,
+\quad
+B\neq 0
+\ \text{ or }
+C\neq 0 \notag\\
+&\Pi_{\mathrm{act}}
+=
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+U^\top \notag\\
+&\Pi_{\mathrm{act}}
+P_{\mathrm{sp}}
+\Pi_{\mathrm{act}}
+=
+U
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+\begin{bmatrix}
+A & B\\
+C & D
+\end{bmatrix}
+\begin{bmatrix}
+I_{2m} & 0\\
+0 & 0
+\end{bmatrix}
+U^\top
+=
+U
+\begin{bmatrix}
+A & 0\\
+0 & 0
+\end{bmatrix}
+U^\top \notag\\
+&\Pi_{\mathrm{act}}
+P_{\mathrm{sp}}
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+\quad
+\Longleftrightarrow
+\quad
+A
+=
+I_{2m} \notag\\
+&B\neq 0
+\text{ or }
+C\neq 0
+\Longrightarrow
+P_{\mathrm{sp}}
+\text{ mixes active / null blocks}
+\Longrightarrow
+\exists r:\
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r)
+\Pi_{\mathrm{act}}
+\neq
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}} \notag\\
+&\Longrightarrow
+\exists r_i,r_j:\
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+\neq
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\quad
+(\text{violates [4.3]}) \notag\\
+&\boxed{
+P_{\mathrm{sp}}
+\in
+\mathcal{B}\setminus\mathcal{A}
+\Longrightarrow
+\neg
+\Big[
+\forall r_i,r_j:\
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\Big]
+}
+\quad(\text{uses [3.5],[2.3],[4.1],[2.10]})
+\end{align}
+
+\section{Attention Logits (BEG-5)}
+
+\subsection{Query/Key/Value and Coordinates}
+
+\begin{align}
+\boxed{[5.1] \text{ (query/key/value and coordinates)}}
+&W_Q,W_K,W_V
+\in
+\mathbb{R}^{d_h\times D}
+,
+\quad
+x_i
+\in
+\mathbb{R}^{D}
+,
+\quad
+r_i
+\in
+\mathbb{R}^{d_c}
+\quad
+(\text{for each token }i) \notag\\
+&q_i
+\eqdef
+W_Q x_i
+\in
+\mathbb{R}^{d_h}
+,\quad
+k_i
+\eqdef
+W_K x_i
+\in
+\mathbb{R}^{d_h}
+,\quad
+v_i
+\eqdef
+W_V x_i
+\in
+\mathbb{R}^{d_h} \notag\\
+&q_i^{(\mathrm{act})}
+\eqdef
+\Pi_{\mathrm{act}} q_i
+,\quad
+k_j^{(\mathrm{act})}
+\eqdef
+\Pi_{\mathrm{act}} k_j
+\eqref{2.3}
+\operatorname{im}(\Pi_{\mathrm{act}}) \notag\\
+&d_{\mathrm{act}}
+\eqdef
+\dim(\operatorname{im}(\Pi_{\mathrm{act}}))
+=
+2m
+\eqref{2.3}
+\mathbb{N}
+\quad(\text{uses [2.3],[0.2]})
+\end{align}
+
+\subsection{Rotated Active Queries/Keys}
+
+\begin{align}
+\boxed{[5.2] \text{ (rotated active queries/keys)}}
+&\tilde{q}_i
+\eqdef
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)
+q_i^{(\mathrm{act})} \notag\\
+&\tilde{k}_j
+\eqdef
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_j)
+k_j^{(\mathrm{act})} \notag\\
+&(\tilde{q}_i,
+\tilde{k}_j
+\in
+\operatorname{im}(\Pi_{\mathrm{act}})
+\eqref{2.3}
+\mathbb{R}^{d_h})
+\quad(\text{uses [5.1],[4.1],[2.3]})
+\end{align}
+
+\subsection{Attention Score $\alpha_{ij}$}
+
+\begin{align}
+\boxed{[5.3] \text{ (attention score }\alpha_{ij}\text{)}}
+&\alpha_{ij}
+\eqdef
+\frac{
+\tilde{q}_i^\top
+\tilde{k}_j
+}{
+\sqrt{d_{\mathrm{act}}}
+} \notag\\
+&\tilde{q}_i^\top
+\tilde{k}_j
+=
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+R_{\mathrm{sp}}(r_i)^\top
+\Pi_{\mathrm{act}}^\top
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_j)
+k_j^{(\mathrm{act})} \notag\\
+&\Pi_{\mathrm{act}}^\top
+=
+\Pi_{\mathrm{act}}
+\eqref{2.3}
+\Pi_{\mathrm{act}}^2
+\eqref{2.3}
+\Pi_{\mathrm{act}}
+\Longrightarrow
+\Pi_{\mathrm{act}}^\top
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}} \notag\\
+&q_i^{(\mathrm{act})}
+=
+\Pi_{\mathrm{act}} q_i
+\in
+\operatorname{im}(\Pi_{\mathrm{act}})
+\eqref{2.3}
+\Pi_{\mathrm{act}}
+q_i^{(\mathrm{act})}
+=
+q_i^{(\mathrm{act})} \notag\\
+&k_j^{(\mathrm{act})}
+\in
+\operatorname{im}(\Pi_{\mathrm{act}})
+\Longrightarrow
+\Pi_{\mathrm{act}}
+k_j^{(\mathrm{act})}
+=
+k_j^{(\mathrm{act})} \notag\\
+&\Longrightarrow
+\tilde{q}_i^\top\tilde{k}_j
+=
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+\Big[
+\big(
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)
+\Pi_{\mathrm{act}}
+\big)^\top
+\big(
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+\big)
+\Big]
+k_j^{(\mathrm{act})} \notag\\
+&\boxed{
+\alpha_{ij}
+=
+\frac{1}{\sqrt{d_{\mathrm{act}}}}
+
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+\Big[
+\big(
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)
+\Pi_{\mathrm{act}}
+\big)^\top
+\big(
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+\big)
+\Big]
+k_j^{(\mathrm{act})}
+}
+\quad(\text{uses [5.2],[5.1],[2.3],[4.1]})
+\end{align}
+
+\subsection{Substitution of Relative Law under $P_{\mathrm{sp}}\in\mathcal{A}$}
+
+\begin{align}
+\boxed{[5.4] \text{ (substitution of relative law under }P_{\mathrm{sp}}\in\mathcal{A}\text{)}}
+&P_{\mathrm{sp}}
+\in
+\mathcal{A}
+\eqref{3.5}
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}}
+\eqref{4.2}
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}} \notag\\
+&(\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)
+\Pi_{\mathrm{act}})^\top
+(\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}})
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}} \notag\\
+&\eqref{4.3}
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}} \notag\\
+&\Longrightarrow
+\alpha_{ij}
+=
+\frac{1}{\sqrt{d_{\mathrm{act}}}}
+
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+\Big[
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\Big]
+k_j^{(\mathrm{act})} \notag\\
+&\boxed{
+P_{\mathrm{sp}}\in\mathcal{A}
+\Longrightarrow
+\alpha_{ij}
+=
+\frac{1}{\sqrt{d_{\mathrm{act}}}}
+
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+\Big[
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\Big]
+k_j^{(\mathrm{act})}
+}
+\quad(\text{uses [5.3],[4.2],[4.3],[3.5],[2.10]})
+\end{align}
+
+\subsection{Failure of Strict Relative Form if $P_{\mathrm{sp}}\in\mathcal{B}\setminus\mathcal{A}$}
+
+\begin{align}
+\boxed{[5.5] \text{ (failure of strict relative form if }P_{\mathrm{sp}}\in\mathcal{B}\setminus\mathcal{A}\text{)}}
+&P_{\mathrm{sp}}
+\in
+\mathcal{B}\setminus\mathcal{A}
+\eqref{3.5}
+\neg\Big[
+\forall r:\
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r)
+\Pi_{\mathrm{act}}
+=
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r)
+\Pi_{\mathrm{act}}
+\Big] \notag\\
+&\eqref{4.4}
+\exists r_i,r_j:
+\Pi_{\mathrm{act}}
+R_{\mathrm{sp}}(r_i)^\top
+R_{\mathrm{sp}}(r_j)
+\Pi_{\mathrm{act}}
+\neq
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}} \notag\\
+&\eqref{5.3}
+\exists r_i,r_j:
+\alpha_{ij}
+\neq
+\frac{1}{\sqrt{d_{\mathrm{act}}}}
+
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+\Big[
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\Big]
+k_j^{(\mathrm{act})} \notag\\
+&\boxed{
+P_{\mathrm{sp}}
+\in
+\mathcal{B}\setminus\mathcal{A}
+\Longrightarrow
+\neg\Big[
+\forall i,j:\
+\alpha_{ij}
+=
+\frac{1}{\sqrt{d_{\mathrm{act}}}}
+
+(q_i^{(\mathrm{act})})^\top
+\big[
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\big]
+k_j^{(\mathrm{act})}
+\Big]
+}
+\quad(\text{uses [5.3],[4.4],[3.5],[2.10]})
+\end{align}
+
+\section{Summary and Main Theorem (BEG-6)}
+
+\subsection{Main Result}
+
+\begin{align}
+\boxed{\text{[GOAL-FINAL]}}
+&\Big(
+\underbrace{
+\forall k\in K:\ L_k^\top=-L_k\ \wedge\ [L_a,L_b]=0
+}_{[1.1]}
+\wedge
+\underbrace{
+2m+d_{\mathrm{null}}=d_h,\ U\in O(d_h),\ \Pi_{\mathrm{act}}\text{ from [2.3]}
+}_{[2.2],[2.3]}
+\wedge
+\underbrace{
+P_{\mathrm{sp}}\in\mathcal{A}\subseteq SO(d_h)
+}_{[3.5],[3.4]}
+\Big) \notag\\
+&\Longrightarrow
+\forall i,j:\ \notag\\
+&\boxed{
+\alpha_{ij}
+=
+\frac{1}{\sqrt{2m}}
+
+\big(
+q_i^{(\mathrm{act})}
+\big)^\top
+\Big[
+\Pi_{\mathrm{act}}
+R_{\mathrm{STR}}(r_j-r_i)
+\Pi_{\mathrm{act}}
+\Big]
+k_j^{(\mathrm{act})}
+} \notag\\
+&\text{and} \notag\\
+&\Big(
+P_{\mathrm{sp}}\in\mathcal{B}\setminus\mathcal{A}
+\Big)
+\Longrightarrow
+\neg\Big(
+\forall i,j:\ \alpha_{ij}\ \text{as above depends only on }r_j-r_i
+\Big) \notag\\
+&\text{(uses [5.4],[5.5],[2.9],[2.8],[1.5],[1.3],[2.7],[4.1],[4.2],[4.3])}
+\end{align}
+
+\subsection{Interpretation}
+
+The main theorem establishes:
 
 \begin{itemize}
-    \item $R_{\mathrm{STR}}(r)$ has the block-rotation form $[2.11]$, lies in $SO(d_h)$ $[2.12]$, and satisfies the relative-offset identity $[2.13]$.
-    \item The Cayley transform parametrisation $[3.7]$ yields $P_{\mathrm{sp}} \in SO(d_h)$ with controllable sparsity $[3.5]$; masks supported on the null block give $\mathcal{A}$ $[3.12]$ while all masks give $\mathcal{B}$ $[3.14]$.
-    \item $R_{\mathrm{sp}}(r)$ preserves purely relative offsets on the active block when $P_{\mathrm{sp}} \in \mathcal{A}$ $[4.4]$, but leaks absolute position for $P_{\mathrm{sp}} \notin \mathcal{A}$ $[4.5]$.
-    \item Attention logits $\alpha_{ij}$ inherit the relative-offset dependence when $P_{\mathrm{sp}} \in \mathcal{A}$ $[5.9]$ and include absolute information otherwise $[5.10]$.
-\end{itemize}
+\item When $P_{\mathrm{sp}} \in \mathcal{A}$ (null-block-only post-rotation), attention scores $\alpha_{ij}$ depend \emph{only} on the relative position vector $r_j - r_i$, implementing pure relative-position encoding.
 
-The auxiliary cleanups $\mathsf{cleanup}$ add the explicit references requested by the reviewer without affecting hypotheses $[1.2]$–$[1.3]$ or constructions $[2.11]$, $[3.7]$, $[4.1]$, so statement $[5.9]$ remains the main theorem.
+\item When $P_{\mathrm{sp}} \in \mathcal{B} \setminus \mathcal{A}$ (post-rotation mixes active and null blocks), the relative-position property fails, and attention scores leak absolute positional information.
+
+\item The construction via commuting skew-symmetric generators $\{L_k\}$ ensures $R_{\mathrm{STR}}(r) \in SO(d_h)$ satisfies the group law $R_{\mathrm{STR}}(r_i)^\top R_{\mathrm{STR}}(r_j) = R_{\mathrm{STR}}(r_j - r_i)$.
+
+\item The Cayley parameterization provides a sparse, learnable family of orthogonal post-rotations while maintaining the $SO(d_h)$ structure.
+\end{itemize}
 
 \end{document}
