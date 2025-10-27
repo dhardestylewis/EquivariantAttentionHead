@@ -45,22 +45,43 @@ class ActiveSubspaceProjector(nn.Module):
         U_init = torch.eye(d_h, d_act)
         self.U = nn.Parameter(U_init)  # (d_h, d_act)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, return_stats: bool = False):
         """
-        Project x onto active subspace: Π_act x
+        Project x onto active subspace: I_pi_act x
 
         Args:
             x: Tensor of shape (..., d_h)
+            return_stats: If True, also return diagnostic statistics.
 
         Returns:
-            Projected tensor of shape (..., d_h)
+            Projected tensor of shape (..., d_h) if return_stats is False.
+            Otherwise returns (projected, stats) where stats contains norms.
         """
         # Orthonormalize U using QR decomposition
         U, _ = torch.linalg.qr(self.U)  # (d_h, d_act)
 
-        # Project: Π_act x = U U^T x
-        x_proj = torch.einsum('...h,ha,ba->...b', x, U, U)  # (..., d_h)
-        return x_proj
+        # Project: I_pi_act x = U U^T x
+        proj_matrix = U @ U.T  # (d_h, d_h)
+        x_proj = torch.matmul(x, proj_matrix)  # (..., d_h)
+
+        if not return_stats:
+            return x_proj
+
+        # Collect diagnostics about active/null components
+        input_norm = x.norm(dim=-1)
+        proj_norm = x_proj.norm(dim=-1)
+        residual = x - x_proj
+        residual_norm = residual.norm(dim=-1)
+        eta_mix = residual_norm / (input_norm + 1e-6)
+
+        stats = {
+            'input_norm': input_norm.detach(),
+            'proj_norm': proj_norm.detach(),
+            'residual_norm': residual_norm.detach(),
+            'eta_mix': eta_mix.detach(),
+        }
+
+        return x_proj, stats
 
     def get_projection_matrix(self) -> torch.Tensor:
         """Returns Π_act = U U^T ∈ ℝ^{d_h × d_h}"""
@@ -133,7 +154,8 @@ class RelativePositionAttention(nn.Module):
         self,
         x: torch.Tensor,
         positions: torch.Tensor,
-        mask: torch.Tensor = None
+        mask: torch.Tensor = None,
+        collect_diagnostics: bool = False,
     ) -> tuple[torch.Tensor, dict]:
         """
         Args:
@@ -156,16 +178,61 @@ class RelativePositionAttention(nn.Module):
         K = self.W_K(x).view(B, N, self.n_heads, self.d_head)  # (B, N, H, d_h)
         V = self.W_V(x).view(B, N, self.n_heads, self.d_head)  # (B, N, H, d_h)
 
+        diagnostics = None
+
         # Apply active subspace projection if enabled (T4.2)
         if self.projectors is not None:
-            Q_proj = torch.stack([
-                self.projectors[h](Q[:, :, h, :]) for h in range(self.n_heads)
-            ], dim=2)  # (B, N, H, d_h)
-            K_proj = torch.stack([
-                self.projectors[h](K[:, :, h, :]) for h in range(self.n_heads)
-            ], dim=2)  # (B, N, H, d_h)
+            q_proj_heads = []
+            k_proj_heads = []
+            q_stats = []
+            k_stats = []
+            for h in range(self.n_heads):
+                if collect_diagnostics:
+                    q_proj, q_head_stats = self.projectors[h](Q[:, :, h, :], return_stats=True)
+                    k_proj, k_head_stats = self.projectors[h](K[:, :, h, :], return_stats=True)
+                    q_stats.append(q_head_stats)
+                    k_stats.append(k_head_stats)
+                else:
+                    q_proj = self.projectors[h](Q[:, :, h, :])
+                    k_proj = self.projectors[h](K[:, :, h, :])
+                q_proj_heads.append(q_proj)
+                k_proj_heads.append(k_proj)
+
+            Q_proj = torch.stack(q_proj_heads, dim=2)  # (B, N, H, d_h)
+            K_proj = torch.stack(k_proj_heads, dim=2)  # (B, N, H, d_h)
+
+            if collect_diagnostics:
+                def _stack_stats(key, stats_list):
+                    stacked = torch.stack([s[key] for s in stats_list], dim=0)  # (H, B, N)
+                    return stacked.permute(1, 2, 0)  # (B, N, H)
+
+                diagnostics = {
+                    'q_input_norm': _stack_stats('input_norm', q_stats),
+                    'q_proj_norm': _stack_stats('proj_norm', q_stats),
+                    'q_residual_norm': _stack_stats('residual_norm', q_stats),
+                    'q_eta_mix': _stack_stats('eta_mix', q_stats),
+                    'k_input_norm': _stack_stats('input_norm', k_stats),
+                    'k_proj_norm': _stack_stats('proj_norm', k_stats),
+                    'k_residual_norm': _stack_stats('residual_norm', k_stats),
+                    'k_eta_mix': _stack_stats('eta_mix', k_stats),
+                }
         else:
             Q_proj, K_proj = Q, K
+            if collect_diagnostics:
+                q_input_norm = Q.norm(dim=-1).detach()
+                k_input_norm = K.norm(dim=-1).detach()
+                zeros_q = torch.zeros_like(q_input_norm)
+                zeros_k = torch.zeros_like(k_input_norm)
+                diagnostics = {
+                    'q_input_norm': q_input_norm,
+                    'q_proj_norm': q_input_norm,
+                    'q_residual_norm': zeros_q,
+                    'q_eta_mix': zeros_q,
+                    'k_input_norm': k_input_norm,
+                    'k_proj_norm': k_input_norm,
+                    'k_residual_norm': zeros_k,
+                    'k_eta_mix': zeros_k,
+                }
 
         # Compute relative rotations R_STR(r_j - r_i) for each head (T2.9)
         # We compute per-batch-item to handle varying positions
@@ -223,6 +290,9 @@ class RelativePositionAttention(nn.Module):
             'commutator_loss': avg_comm_loss,
         }
 
+        if collect_diagnostics and diagnostics is not None:
+            metrics['diagnostics'] = {key: value.detach().cpu() for key, value in diagnostics.items()}
+
         return output, metrics
 
 
@@ -265,7 +335,8 @@ class RelativePositionTransformerBlock(nn.Module):
         self,
         x: torch.Tensor,
         positions: torch.Tensor,
-        mask: torch.Tensor = None
+        mask: torch.Tensor = None,
+        collect_diagnostics: bool = False,
     ) -> tuple[torch.Tensor, dict]:
         """
         Args:
@@ -278,7 +349,12 @@ class RelativePositionTransformerBlock(nn.Module):
             metrics: dict
         """
         # Attention with residual
-        attn_out, metrics = self.attn(self.norm1(x), positions, mask)
+        attn_out, metrics = self.attn(
+            self.norm1(x),
+            positions,
+            mask,
+            collect_diagnostics=collect_diagnostics,
+        )
         x = x + attn_out
 
         # Feedforward with residual

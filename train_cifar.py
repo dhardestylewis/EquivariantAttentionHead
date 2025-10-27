@@ -6,6 +6,7 @@ More challenging dataset than MNIST to demonstrate theorem's effectiveness.
 """
 
 import argparse
+import json
 from pathlib import Path
 
 import torch
@@ -114,6 +115,8 @@ def main():
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--lr', type=float, default=3e-4)
     parser.add_argument('--lambda-comm', type=float, default=0.01, help='Commutator loss weight (T5.1)')
+    parser.add_argument('--architecture', type=str, default='relative', choices=['relative', 'absolute', 'rope'], help='Model architecture variant')
+    parser.add_argument('--metrics-file', type=str, default=None, help='Optional JSON file to record training metrics')
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu')
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--save-dir', type=str, default='checkpoints_cifar')
@@ -136,6 +139,8 @@ def main():
 
     save_dir = Path(args.save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
+
+    metrics_path = Path(args.metrics_file) if args.metrics_file else (save_dir / f'metrics_{args.architecture}.json')
 
     # Data augmentation for CIFAR-10
     if args.augment:
@@ -187,6 +192,7 @@ def main():
 
     device = torch.device(args.device)
     model = create_cifar_model(
+        architecture=args.architecture,
         d_model=args.d_model,
         d_head=args.d_head,
         n_heads=args.n_heads,
@@ -211,6 +217,9 @@ def main():
     )
 
     best_acc = 0.0
+    best_epoch = 0
+    best_metrics = None
+    history = []
     for epoch in range(1, args.epochs + 1):
         print(f"\nEpoch {epoch}/{args.epochs}")
         print("-" * 60)
@@ -221,6 +230,13 @@ def main():
 
         test_metrics = evaluate(model, test_loader, device)
 
+        history.append({
+            'epoch': epoch,
+            'train': {k: float(v) for k, v in train_metrics.items()},
+            'test': {k: float(v) for k, v in test_metrics.items()},
+            'lr': scheduler.get_last_lr()[0],
+        })
+
         print(f"\nTrain - Loss: {train_metrics['loss']:.4f}, "
               f"CE: {train_metrics['ce_loss']:.4f}, "
               f"Comm: {train_metrics['comm_loss']:.4f}, "
@@ -230,7 +246,9 @@ def main():
               f"Acc: {test_metrics['accuracy']:.2f}%")
 
         if test_metrics['accuracy'] > best_acc:
-            best_acc = test_metrics['accuracy']
+            best_acc = float(test_metrics['accuracy'])
+            best_epoch = epoch
+            best_metrics = history[-1]
             checkpoint = {
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -243,6 +261,26 @@ def main():
 
         scheduler.step()
 
+    if best_metrics is None and history:
+        best_metrics = history[-1]
+        best_epoch = best_metrics['epoch']
+
+    summary = {
+        'dataset': 'cifar10',
+        'architecture': args.architecture,
+        'lambda_comm': args.lambda_comm,
+        'epochs': args.epochs,
+        'augment': bool(args.augment),
+        'best_accuracy': float(best_acc),
+        'best_epoch': int(best_epoch),
+        'best_comm_loss': best_metrics['test']['comm_loss'] if best_metrics else None,
+        'final_comm_loss': history[-1]['test']['comm_loss'] if history else None,
+        'best_metrics': best_metrics,
+        'history': history,
+    }
+    metrics_path.parent.mkdir(parents=True, exist_ok=True)
+    metrics_path.write_text(json.dumps(summary, indent=2), encoding='utf-8')
+    print(f"Metrics saved to {metrics_path}")
     print(f"\nTraining completed! Best test accuracy: {best_acc:.2f}%")
 
 

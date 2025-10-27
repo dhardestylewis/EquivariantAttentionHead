@@ -1,4 +1,4 @@
-# Equivariant Structured Positional Rotations
+﻿# Equivariant Structured Positional Rotations
 
 This repository contains two tightly linked artifacts:
 
@@ -69,6 +69,56 @@ Passing the suite shows that the code respects the structural statements from Th
 
 ---
 
+---
+
+## Experimental Diagnostics
+
+### Translation robustness (Experiment A)
+Run the scripted probe to compare checkpoints under integer pixel shifts. Example on MNIST with three trained models (relative, absolute, rope):
+
+`powershell
+python analysis/shift_probe.py \
+    --dataset mnist \
+    --models relative=checkpoints/mnist_relative/best_model.pt \
+             absolute=checkpoints/mnist_absolute/best_model.pt@absolute \
+             rope=checkpoints/mnist_rope/best_model.pt@rope \
+    --shift-pixels 0 2 4 8 \
+    --device cuda \
+    --output results/mnist_shift.json
+`
+
+The JSON log reports base accuracy, class agreement after shifting, and the average L2 change in logits for each translation.
+
+### lambda_comm sweeps (Experiment B)
+Aggregate the training runs produced with different regularisation weights to visualise the epsilon-accuracy frontier:
+
+`powershell
+python analysis/lambda_sweep.py \
+    --metrics checkpoints/mnist_relative/metrics_relative.json \
+             checkpoints/mnist_relative/metrics_lambda3e-4.json \
+             checkpoints/mnist_relative/metrics_lambda1e-3.json \
+    --sort-by epsilon \
+    --output results/mnist_lambda_sweep.json
+`
+
+Each metrics file is emitted automatically by 	rain_mnist.py / 	rain_cifar.py; the sweep script prints a table and can save a consolidated JSON payload for plotting.
+
+### Active subspace diagnostics (Experiment C)
+Inspect Pi_act separation and eta_mix leakage for a trained checkpoint:
+
+`powershell
+python analysis/active_subspace.py \
+    --dataset mnist \
+    --checkpoint checkpoints/mnist_relative/best_model.pt \
+    --max-batches 8 \
+    --store-sample \
+    --output results/mnist_active_subspace.json
+`
+
+The summary records per-block means/maxima for q_proj_norm, k_proj_norm, and eta_mix. With --store-sample it also captures a 2D heatmap of the active projection norms for the first validation example.
+
+---
+
 ## Training Scripts
 
 ```powershell
@@ -118,3 +168,4 @@ The VS Code workspace recommends the LaTeX Workshop extension for editing conven
 | T5.1 / T6.2 | `compute_commutator_loss()` provides the penalty that keeps generators near the commuting manifold. |
 
 With these pieces in place, the repository documents why the theory holds, how the implementation realises it, and how to validate and train the models on MNIST and CIFAR-10.
+
