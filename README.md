@@ -13,13 +13,12 @@ The manuscripts explain why the construction works; the code and tests verify th
 
 | Path | Description |
 |------|-------------|
-| `proof-algebraic-detailed.tex` | Full algebraic derivation with every intermediate step documented. |
-| `proof-axiomatic-compact.tex`  | Axiomatic proof with boxed statements `[S#]`, explicit dependencies, and robustness bounds. |
+| `proof-algebraic-detailed.tex` | Full derivation. |
 | `src/rotations.py` | Implements the structured rotations `R_STR` from Theorems T1.3-T2.9. |
 | `src/attention.py` | Implements the relative-position attention head from Theorem T4.5 and the commutator penalty (T5.1). |
-| `src/model.py` | Vision transformer style backbone that uses only the structured rotations (no learned positional encodings). |
+| `src/model.py` | Vision transformer that uses only the structured rotations (no learned positional encodings). |
 | `train_mnist.py`, `train_cifar.py` | Reference training loops for MNIST and CIFAR-10. |
-| `test_implementation.py` | Structural test harness covering theorems T0.1-T6.2. |
+| `test_implementation.py` | Tests covering theorems T0.1-T6.2. |
 | `IMPLEMENTATION.md` | Additional engineering notes and hyperparameters. |
 
 ---
