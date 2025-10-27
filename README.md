@@ -1,6 +1,27 @@
 # Equivariant Structured Positional Rotations
 
-This workspace contains a LaTeX manuscript that formalizes the BEG-0 through BEG-6 development for structured positional rotations in attention heads.
+This workspace contains LaTeX manuscripts that formalize the relative-position attention theorem via commuting skew-symmetric generators, proven through **two independent approaches**:
+
+## Proof Approaches
+
+### 1. **proof-algebraic-detailed.tex** (2040 lines)
+- **Style**: Detailed step-by-step derivation with full algebraic expansions
+- **Structure**: Sections BEG-0 through BEG-6 with narrative flow
+- **Target**: Complete textbook-style exposition showing every matrix manipulation
+- **Use case**: Understanding the detailed mechanics of each transformation
+
+### 2. **proof-axiomatic-compact.tex** (692 lines)
+- **Style**: Compact axiomatic proof with boxed statements and dependency tracking
+- **Structure**: Numbered statements S0.1–S8.2 with explicit `[deps: ...]` annotations
+- **Target**: Formal verification-ready presentation with minimal redundancy
+- **Key features**:
+  - Simultaneous block diagonalization theorem (S2.2) with proof sketch
+  - Complete S0 foundation lemmas (determinant, exponential, spectral theory)
+  - Cayley expressivity fix with eigenvalue -1 restriction
+  - Quantitative robustness bounds with error analysis
+- **Use case**: Auditing logical dependencies and formal rigor
+
+Both proofs establish theorems **S8.1** (exact relative-position property) and **S8.2** (robust approximation) from first principles.
 
 ## Prerequisites
 
@@ -15,24 +36,23 @@ After installation, ensure the LaTeX binaries are on your `PATH`. You can verify
 pdflatex --version
 ```
 
-## Building the PDF
+## Building the PDFs
 
-A helper PowerShell script is provided that compiles `main.tex` twice (to resolve references) and moves the output into the `build` directory.
+Compile either proof document using `pdflatex`:
 
-```powershell
-./build.ps1
+### Detailed Algebraic Proof
+```bash
+pdflatex -interaction=nonstopmode -halt-on-error proof-algebraic-detailed.tex
+pdflatex -interaction=nonstopmode -halt-on-error proof-algebraic-detailed.tex
 ```
 
-The generated PDF will be located at `build/main.pdf`.
-
-## Manual Compilation
-
-If you prefer to run `pdflatex` manually, execute the following commands from the project root:
-
-```powershell
-pdflatex -interaction=nonstopmode -halt-on-error main.tex
-pdflatex -interaction=nonstopmode -halt-on-error main.tex
+### Compact Axiomatic Proof
+```bash
+pdflatex -interaction=nonstopmode -halt-on-error proof-axiomatic-compact.tex
+pdflatex -interaction=nonstopmode -halt-on-error proof-axiomatic-compact.tex
 ```
+
+Run twice to resolve references.
 
 Cleaning auxiliary files:
 
