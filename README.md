@@ -26,14 +26,6 @@ The manuscripts explain why the construction works; the code and tests verify th
 
 ## Installation
 
-### LaTeX toolchain
-
-Install a LaTeX distribution such as [MiKTeX](https://miktex.org/download) or [TeX Live](https://www.tug.org/texlive/). Verify availability with:
-
-```powershell
-pdflatex --version
-```
-
 ### Python environment
 
 ```powershell
@@ -133,28 +125,6 @@ python train_cifar.py --epochs 100 --augment --lambda-comm 0.01 --device cuda
 ```
 
 The commutator penalty `lambda_comm * epsilon` is the empirical counterpart of Theorems T5.1 and T6.2. During training, monitor the reported `commutator_loss`; values below `1e-2` indicate the generators remain close to the commuting regime assumed in the theory.
-
----
-
-## Building the Manuscripts
-
-Compile each document twice to resolve references:
-
-```powershell
-pdflatex -interaction=nonstopmode -halt-on-error proof-algebraic-detailed.tex
-pdflatex -interaction=nonstopmode -halt-on-error proof-algebraic-detailed.tex
-
-pdflatex -interaction=nonstopmode -halt-on-error proof-axiomatic-compact.tex
-pdflatex -interaction=nonstopmode -halt-on-error proof-axiomatic-compact.tex
-```
-
-Clean auxiliary files when needed:
-
-```powershell
-Remove-Item *.aux, *.log, *.out, *.toc -ErrorAction Ignore
-```
-
-The VS Code workspace recommends the LaTeX Workshop extension for editing convenience.
 
 ---
 
