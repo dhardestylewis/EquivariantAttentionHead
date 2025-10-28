@@ -1,11 +1,12 @@
 ﻿# Equivariant Structured Positional Rotations
 
-This repository contains two tightly linked artifacts:
+
+This repository contains:
 
 1. **Formal proofs** showing that commuting skew-symmetric generators yield exact (and robust) relative-position attention.
 2. **A PyTorch implementation** that follows those proofs, together with tests and training scripts for MNIST and CIFAR-10.
 
-The manuscripts explain why the construction works; the code and tests verify that the numerical implementation satisfies the hypotheses before we train on data.
+The manuscripts explain why the construction works; the code and tests verify that the numerical implementation satisfies the hypotheses before training on data.
 
 ---
 

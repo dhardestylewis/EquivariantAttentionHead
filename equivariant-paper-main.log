@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.16)  27 OCT 2025 21:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.16)  27 OCT 2025 21:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -439,74 +439,24 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 28.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 
-LaTeX Warning: Reference `sec:intro' on page 1 undefined on input line 32.
-
-
-LaTeX Warning: Reference `sec:structured-rotations' on page 1 undefined on inpu
-t line 33.
-
-
-LaTeX Warning: Reference `sec:favor-structured' on page 1 undefined on input li
-ne 35.
-
-
-LaTeX Warning: Reference `sec:appendix-theory' on page 1 undefined on input lin
-e 37.
-
-
-LaTeX Warning: Reference `sec:appendix-theory' on page 1 undefined on input lin
-e 52.
-
-
-
 [1
 
 {C:/Users/dhl/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
 
-LaTeX Warning: Reference `sec:appendix-theory' on page 2 undefined on input lin
-e 62.
-
-
-LaTeX Warning: Reference `lem:appendix-block-structure' on page 2 undefined on 
-input line 68.
-
-
-LaTeX Warning: Reference `sec:appendix-theory' on page 2 undefined on input lin
-e 102.
-
-
-
 [2]
-
-LaTeX Warning: Reference `thm:appendix-relative-logits' on page 3 undefined on 
-input line 120.
+Overfull \hbox (13.92867pt too wide) in paragraph at lines 133--135
+[]\OT1/cmr/m/n/10.95 ======= >>>>>>> origin/claude/relative-rotation-attention-
+011CUWhuEKcD3BCNeCNXEMzj 
+ []
 
 
 
 [3]
 
-LaTeX Warning: Reference `eq:appendix-block-L' on page 4 undefined on input lin
-e 216.
-
-
-
 [4
 
 ]
-
-LaTeX Warning: Reference `eq:appendix-block-A' on page 5 undefined on input lin
-e 258.
-
-
-LaTeX Warning: Reference `eq:appendix-block-L' on page 5 undefined on input lin
-e 258.
-
-
-LaTeX Warning: Reference `eq:appendix-def-A-R' on page 5 undefined on input lin
-e 259.
-
-
-Overfull \hbox (34.67947pt too wide) detected at line 269
+Overfull \hbox (34.67947pt too wide) detected at line 266
 []  []\OML/cmm/m/it/10.95 ^^R[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 r\OT1/cm
 r/m/n/10.95 )\OML/cmm/m/it/10.95 J[] \OT1/cmr/m/n/10.95 = [] [] = [] = \OML/cmm
 /m/it/10.95 R[][]^^R[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 r\OT1/cmr/m/n/10.
@@ -514,112 +464,49 @@ r/m/n/10.95 )\OML/cmm/m/it/10.95 J[] \OT1/cmr/m/n/10.95 = [] [] = [] = \OML/cmm
  []
 
 
-LaTeX Warning: Reference `eq:appendix-block-R' on page 5 undefined on input lin
-e 271.
-
-
-LaTeX Warning: Reference `eq:appendix-block-A' on page 5 undefined on input lin
-e 272.
-
-
-LaTeX Warning: Reference `eq:appendix-relative-rotation' on page 5 undefined on
- input line 281.
-
-
-LaTeX Warning: Reference `eq:appendix-block-R' on page 5 undefined on input lin
-e 281.
-
-
 
 [5]
 
-LaTeX Warning: Reference `lem:appendix-structured-exponential' on page 6 undefi
-ned on input line 328.
-
-
-LaTeX Warning: Reference `eq:appendix-tilde-qk' on page 6 undefined on input li
-ne 371.
-
-
-LaTeX Warning: Reference `lem:appendix-cayley' on page 6 undefined on input lin
-e 380.
-
-
-LaTeX Warning: Reference `lem:appendix-structured-exponential' on page 6 undefi
-ned on input line 382.
-
-
-LaTeX Warning: Reference `eq:appendix-relative-logits' on page 6 undefined on i
-nput line 384.
-
-
-
 [6]
-
-LaTeX Warning: Reference `eq:appendix-robust-bound' on page 7 undefined on inpu
-t line 445.
-
-
-LaTeX Warning: Reference `thm:appendix-relative-logits' on page 7 undefined on 
-input line 450.
-
-
-LaTeX Warning: Reference `thm:appendix-robust-logits' on page 7 undefined on in
-put line 452.
-
-
 
 [7] (equivariant-paper-main.aux)
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-09-02>
  ***********
+Package rerunfilecheck Info: File `equivariant-paper-main.out' has not changed.
 
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `equivariant-paper-main.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `equivariant-paper-main.out':
-(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
-(rerunfilecheck)             After:  0C9FAA6CB99D4188B097DC7EDDDDA875;1512.
+(rerunfilecheck)             Checksum: 518F4C88E0000057DCF35F948E8076D4;1377.
  ) 
 Here is how much of TeX's memory you used:
- 11347 strings out of 468081
- 176088 string characters out of 5426756
- 603996 words of memory out of 5000000
- 39817 multiletter control sequences out of 15000+600000
- 638585 words of font info for 81 fonts, out of 8000000 for 9000
+ 11352 strings out of 468081
+ 176154 string characters out of 5426756
+ 605037 words of memory out of 5000000
+ 39824 multiletter control sequences out of 15000+600000
+ 638277 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,14n,79p,761b,598s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
 bx10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
 s/cm/cmbx12.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/
-amsfonts/cm/cmbx9.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/p
-ublic/amsfonts/cm/cmex10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/
-type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/dhl/AppData/Local/Programs/
-MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/dhl/AppData/Local/Pro
-grams/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/dhl/AppData/Loc
-al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/dhl/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/dhl
-/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/User
-s/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:
-/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pf
-b><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
-sy10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
-s/cm/cmsy8.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/a
-msfonts/cm/cmti10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/p
-ublic/amsfonts/symbols/msbm10.pfb>
-Output written on equivariant-paper-main.pdf (7 pages, 263861 bytes).
+amsfonts/cm/cmex10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/cm/cmmi10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/dhl/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/dhl/AppData/Local/Pro
+grams/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/dhl/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/dhl/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/dhl/
+AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users
+/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/
+Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.p
+fb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
+msy8.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
+s/cm/cmti10.pfb><C:/Users/dhl/AppData/Local/Programs/MiKTeX/fonts/type1/public/
+amsfonts/symbols/msbm10.pfb>
+Output written on equivariant-paper-main.pdf (7 pages, 261280 bytes).
 PDF statistics:
- 194 PDF objects out of 1000 (max. 8388607)
- 66 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 235 PDF objects out of 1000 (max. 8388607)
+ 65 named destinations out of 1000 (max. 500000)
+ 57 words of extra memory for PDF output out of 10000 (max. 10000000)
 
