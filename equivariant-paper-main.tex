@@ -97,6 +97,20 @@ consequently preserves the relative rotation property in the active block.
 \section{Positive Orthogonal Random Features}
 \label{sec:favor-structured}
 
+<<<<<<< HEAD
+=======
+We adapt the FAVOR$^+$ methodology to the structured rotation setting. The softmax kernel for
+queries $x$ and keys $y$ satisfies $\operatorname{SM}(x,y) = \exp(x^\top y)$ and admits representations
+based on positive random features. Appendix~\ref{sec:appendix-theory} proves that choosing
+\[
+\phi(x) = \exp\left(\frac{\|x\|^2}{2}\right) \exp(w^\top x),
+\qquad w \sim \mathcal{N}(0,I_d),
+\]
+produces an unbiased positive estimator with mean-squared error that scales linearly with $\operatorname{SM}(x,y)$.
+Replacing independent samples with orthogonalized ones further decreases variance by a factor that
+depends on $d$ but not on asymptotic limits.
+
+>>>>>>> origin/claude/relative-rotation-attention-011CUWhuEKcD3BCNeCNXEMzj
 \subsection{Relative Logits and Stability}
 
 Combining the structured rotations with the positive features yields the attention logit
@@ -112,9 +126,12 @@ $P_{\mathrm{sp}}$ nearly preserves the active subspace, the deviation from perfe
 bounded by $\Delta_{ij} = O(\varepsilon |r_i|_1 |r_j|_1 + \eta_{\mathrm{mix}})$, where $\eta_{\mathrm{mix}}$ measures
 active-null leakage in $P_{\mathrm{sp}}$.
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> origin/claude/relative-rotation-attention-011CUWhuEKcD3BCNeCNXEMzj
 
 \clearpage
 \appendix
