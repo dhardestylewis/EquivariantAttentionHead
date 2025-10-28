@@ -1,0 +1,460 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\title{Equivariant Structured Positional Rotations}
+\author{Krzysztof Choromanski\\\\Google DeepMind, Columbia University \and Daniel Hardesty Lewis\\\\Columbia University}
+\date{}
+
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Complex}{\mathbb{C}}
+\newcommand{\transpose}{^{\mathsf{T}}}
+\newcommand{\opnorm}[1]{\left\|#1\right\|}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We develop equivariant structured positional rotations that preserve relative displacements inside
+attention layers and provide variance-reduced positive random feature estimators of the softmax
+kernel. Section~\ref{sec:intro} outlines the motivation and the challenges encountered when moving
+beyond rotary encodings. Section~\ref{sec:structured-rotations} presents the algebraic framework of
+commuting skew generators that generate separable translations on the active subspace, while
+Section~\ref{sec:favor-structured} introduces positive orthogonal random features that retain
+softmax-equivalence without sacrificing stability. Proofs and expanded technical results are deferred
+to Appendix~\ref{sec:appendix-theory}.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+
+Positional encodings play a central role in modern attention architectures. Absolute embeddings introduce global references but fail to generalize reliably across varying context windows; relative embeddings, typically implemented through bias tables, improve extrapolation but complicate linear attention variants by requiring explicit attention matrices. Rotary position encodings (RoPE) address this tension by applying token-wise orthogonal rotations whose relative angles depend solely on the difference of token indices, endowing models with translation invariance and compatibility with key value caching. Yet RoPE implicitly assumes a two-dimensional block decomposition with fixed frequencies.
+
+We revisit this design space from two complementary angles. First, we provide a comprehensive algebraic characterization of equivariant structured positional rotations: given commuting skew-symmetric generators $\{L_k\}$ we derive their joint invariant decomposition, identify the active subspace supporting non-trivial rotations, and show that exponentiating $A(r) = \sum_k r_k L_k$ recovers an $SO(d_h)$ action whose relative alignment depends only on displacement vectors $r_j - r_i$. This strictly generalizes the RoPE paradigm to arbitrary commuting families. We also give the block-identity condition on a Cayley post-rotation under which the relative property is exactly preserved on the active subspace.
+
+
+
+\paragraph{Contributions.}
+\begin{enumerate}[leftmargin=1.5em]
+  \item We formalize the structured rotation model: commuting skew generators admit a joint decomposition into $2\times 2$ rotational planes and a null subspace, leading to explicit active and null projectors.\footnote{All proofs appear in Appendix~\ref{sec:appendix-theory}.}
+  \item We prove that the induced exponentials $R_{\mathrm{STR}}(r) = \exp(A(r))$ act as relative rotations, i.e. $R_{\mathrm{STR}}(r_i)^\top R_{\mathrm{STR}}(r_j) = R_{\mathrm{STR}}(r_j - r_i)$, ensuring relative-invariant attention logits once the post-rotation satisfies the block-identity condition on the active subspace ($P_{\mathrm{sp}} \in \mathcal{A}$).
+  \item We introduce stability bounds: when the generators almost commute and the post-rotation nearly preserves the active subspace, deviations from perfect relative invariance remain bounded by $\Delta_{ij} = O(\varepsilon |r_i|_1 |r_j|_1 + \eta_{\mathrm{mix}})$.
+
+\end{enumerate}
+
+\section{Structured Positional Rotations}
+\label{sec:structured-rotations}
+
+We summarize the algebraic groundwork that underpins the equivariant rotations. Full proofs,
+including joint spectral decompositions and orthogonality lemmas, appear in Appendix~\ref{sec:appendix-theory}.
+
+\subsection{Generators and Active Subspaces}
+
+Let $\{L_k\}_{k=1}^{d_c} \subset \Real^{d_h \times d_h}$ be commuting skew-symmetric matrices satisfying
+$[L_a,L_b] = 0$ for all $a,b$. Define the linear combination $A(r) = \sum_{k=1}^{d_c} r_k L_k$ for
+$r \in \Real^{d_c}$. Lemma~\ref{lem:appendix-block-structure} establishes that there exists an orthogonal basis $U$ in which each
+$L_k$ becomes block-diagonal with $2\times 2$ rotation blocks $\lambda_{k,u} J$ and a residual null
+block. This yields complementary projectors $\Pi_{\mathrm{act}}$ and $\Pi_{\mathrm{null}}$ onto the active
+($2m$-dimensional) and null subspaces. In this coordinate system $A(r)$ is block-diagonal with
+entries $\theta_u(r) J$, where $\theta_u(r) = \sum_k \lambda_{k,u} r_k$ encodes the displacement.
+
+\subsection{Exponentials and Relative Invariance}
+
+Exponentiating $A(r)$ produces
+\[
+R_{\mathrm{STR}}(r) = U \left[\left(\bigoplus_{u=1}^m R_2(\theta_u(r))\right) \oplus I_{d_{\mathrm{null}}}\right] U^\top,
+\]
+an orthogonal matrix whose determinant equals one. Because $A(r)$ and $A(s)$ commute, their
+exponentials satisfy $R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s) = R_{\mathrm{STR}}(s-r)$, a property
+that directly ensures relative positional invariance within the active subspace. Moreover,
+$R_{\mathrm{STR}}(r)$ commutes with $\Pi_{\mathrm{act}}$, so the active components of queries and keys
+rotate coherently.
+
+\subsection{Cayley Post-Rotations}
+
+To allow learned post-rotations while preserving orthogonality, we employ Cayley transforms
+$P_{\mathrm{sp}} = (I-S)(I+S)^{-1}$ with $S^\top = -S$. Such transforms remain in $SO(d_h)$ and,
+when restricted to the structured family
+\[
+\mathcal{A} = \left\{U \operatorname{diag}(I_{2m}, R_{\mathrm{null}}) U^\top: R_{\mathrm{null}}\in SO(d_{\mathrm{null}})\right\},
+\]
+they leave the active subspace invariant. Setting $R_{\mathrm{sp}}(r) = R_{\mathrm{STR}}(r) P_{\mathrm{sp}}$
+consequently preserves the relative rotation property in the active block.
+
+\section{Positive Orthogonal Random Features}
+\label{sec:favor-structured}
+
+We adapt the FAVOR$^+$ methodology to the structured rotation setting. The softmax kernel for
+queries $x$ and keys $y$ satisfies $\operatorname{SM}(x,y) = \exp(x^\top y)$ and admits representations
+based on positive random features. Appendix~\ref{sec:appendix-theory} proves that choosing
+\[
+\phi(x) = \exp\left(\frac{\|x\|^2}{2}\right) \exp(w^\top x),
+\qquad w \sim \mathcal{N}(0,I_d),
+\]
+produces an unbiased positive estimator with mean-squared error that scales linearly with $\operatorname{SM}(x,y)$.
+Replacing independent samples with orthogonalized ones further decreases variance by a factor that
+depends on $d$ but not on asymptotic limits.
+
+\subsection{Relative Logits and Stability}
+
+Combining the structured rotations with the positive features yields the attention logit
+\[
+\alpha_{ij}
+= \frac{1}{\sqrt{2m}} (q_i^{(\mathrm{act})})^\top
+  \Bigl(\Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j - r_i) \Pi_{\mathrm{act}}\Bigr)
+  k_j^{(\mathrm{act})},
+\]
+provided $P_{\mathrm{sp}}\in\mathcal{A}$. Theorem~\ref{thm:appendix-relative-logits} shows that $\alpha_{ij}$ depends solely on the
+relative displacement of tokens. When the commutators $[L_a,L_b]$ are small and
+$P_{\mathrm{sp}}$ nearly preserves the active subspace, the deviation from perfect relative invariance is
+bounded by $\Delta_{ij} = O(\varepsilon |r_i|_1 |r_j|_1 + \eta_{\mathrm{mix}})$, where $\eta_{\mathrm{mix}}$ measures
+active-null leakage in $P_{\mathrm{sp}}$.
+
+\subsection{Variance Bounds}
+
+Positive orthogonal features inherit the concentration guarantees developed for FAVOR$^+$. For
+any $a > \operatorname{SM}(x,y)$ and $\lambda > 0$,
+\[
+\Pr\!\left[\widehat{\operatorname{SM}}^{\mathrm{ort}}_m(x,y) > a\right]
+\le \exp(-m \lambda a) \, \mathbb{E}\big[\exp(\lambda X)\big]^m
+\exp\!\left(-\frac{4m(m-1)}{4(d+2)} \lambda^2 \|x+y\|^4\right),
+\]
+where $X = \exp(w^\top (x+y))$. The additional exponential factor shows that orthogonality yields
+strictly tighter tails in every finite dimension, a feature absent from conventional trigonometric
+estimators.
+
+\clearpage
+\appendix
+\section*{F\quad Theoretical Results}
+\label{sec:appendix-theory}
+
+This appendix supplies the algebraic details that justify the structural results stated in the main text.
+In keeping with the style of the referenced supplements, each proof is developed line by line, and
+intermediate equalities are recorded explicitly so that the chain of reasoning can be reconstructed
+without appealing to omitted computations.  Throughout, $d_h,d_c,D\in\mathbb{N}$ denote the head,
+displacement, and token dimensions.  For $k\in\{1,\dots,d_c\}$ we write $L_k\in\Real^{d_h\times d_h}$
+for skew-symmetric generators satisfying
+\begin{equation}
+  L_k^\top = -L_k,
+  \qquad
+  [L_a,L_b] = L_aL_b - L_bL_a = 0
+  \quad\text{for all } a,b.
+  \label{eq:appendix-commuting-generators}
+\end{equation}
+Given $r\in\Real^{d_c}$ we define the linear combination and associated exponential
+\begin{equation}
+  A(r) \coloneqq \sum_{k=1}^{d_c} r_k L_k,
+  \qquad
+  R_{\mathrm{STR}}(r) \coloneqq \exp\!\big(A(r)\big).
+  \label{eq:appendix-def-A-R}
+\end{equation}
+Unless otherwise stated, norms without qualification refer to the Euclidean vector norm and the
+corresponding operator norm on matrices.  The $2\times 2$ rotation matrix is written
+$R_2(\theta) = \begin{psmallmatrix}\cos\theta & -\sin\theta\\ \sin\theta & \cos\theta\end{psmallmatrix}$,
+and we use $J = \begin{psmallmatrix}0 & -1\\ 1 & 0\end{psmallmatrix}$ for the canonical symplectic block.
+
+\subsection*{F.1\quad Proof of Lemma~1 (Joint Block Structure)}
+
+\begin{lemma}\label{lem:appendix-block-structure}
+There exist integers $m,d_{\mathrm{null}}\ge 0$ with $2m+d_{\mathrm{null}} = d_h$ and an orthogonal
+matrix $U\in O(d_h)$ such that, simultaneously for every $k$,
+\begin{equation}
+  U^\top L_k U =
+  \left(\bigoplus_{u=1}^{m} \lambda_{k,u} J\right)
+  \oplus 0_{d_{\mathrm{null}}\times d_{\mathrm{null}}},
+  \label{eq:appendix-block-L}
+\end{equation}
+with real coefficients $\lambda_{k,u}$.  Equivalently, the active subspace has dimension $2m$ and is
+spanned by the first $2m$ columns of $U$, while the null space has dimension $d_{\mathrm{null}}$.
+\end{lemma}
+
+\begin{proof}
+Each generator $L_k$ is real skew-symmetric, hence normal, and the commuting family
+$\{L_k\}_{k=1}^{d_c}$ can be diagonalised simultaneously by a unitary matrix.  Concretely, by the
+spectral theorem there exists a unitary $\mathcal{U}_c$ such that
+\begin{equation}
+  \mathcal{U}_c^* L_k \mathcal{U}_c
+  = \operatorname{diag}\big(i\lambda_{k,1},\dots,i\lambda_{k,d_h}\big),
+  \qquad k=1,\dots,d_c,
+  \label{eq:appendix-unitary-diagonalisation}
+\end{equation}
+with real eigenvalues $\lambda_{k,j}$.  Writing the columns of $\mathcal{U}_c$ as
+$\mathcal{U}_c = [u_1,\dots,u_{d_h}]$ and separating real and imaginary parts,
+every non-real eigenvector occurs in conjugate pairs $(u_j,\overline{u_j})$.  Extracting the real and
+imaginary components of each pair produces a real orthonormal basis:
+\begin{align}
+  \Re u_j &= \frac{1}{2}(u_j + \overline{u_j}),\\
+  \Im u_j &= \frac{1}{2i}(u_j - \overline{u_j}),
+\end{align}
+and for any $k$ we compute
+\begin{align}
+  L_k (\Re u_j)
+  &= \Re (L_k u_j)
+   = \Re (i\lambda_{k,j} u_j)
+   = -\lambda_{k,j} \Im u_j,\\
+  L_k (\Im u_j)
+  &= \Im (L_k u_j)
+   = \Im (i\lambda_{k,j} u_j)
+   = \lambda_{k,j} \Re u_j.
+\end{align}
+Thus the two-dimensional plane spanned by $\{\Re u_j,\Im u_j\}$ is invariant under every $L_k$, and
+within that plane the action is represented by the block $\lambda_{k,j} J$.  Purely real eigenvectors
+of $\mathcal{U}_c$ (if any) contribute to the null block.  Collecting the real basis vectors in an
+orthogonal matrix $U$ establishes the claimed decomposition \eqref{eq:appendix-block-L}.
+\end{proof}
+
+The block structure motivates the projections onto active and null subspaces:
+\begin{equation}
+  \Pi_{\mathrm{act}} \coloneqq U
+  \begin{bmatrix}
+    I_{2m} & 0\\
+    0 & 0
+  \end{bmatrix}
+  U^\top,
+  \qquad
+  \Pi_{\mathrm{null}} \coloneqq U
+  \begin{bmatrix}
+    0 & 0\\
+    0 & I_{d_{\mathrm{null}}}
+  \end{bmatrix}
+  U^\top,
+  \label{eq:appendix-projections}
+\end{equation}
+which satisfy $\Pi_{\mathrm{act}}^2 = \Pi_{\mathrm{act}}$, $\Pi_{\mathrm{null}}^2 = \Pi_{\mathrm{null}}$, and
+$\Pi_{\mathrm{act}}\Pi_{\mathrm{null}} = 0$.
+
+\subsection*{F.2\quad Proof of Lemma~2 (Structured Exponential and Relative Rotations)}
+
+\begin{lemma}\label{lem:appendix-structured-exponential}
+Define $\theta_u(r) \coloneqq \sum_{k=1}^{d_c} \lambda_{k,u} r_k$.  Then, for any $r,s\in\Real^{d_c}$,
+\begin{align}
+  U^\top A(r) U
+    &= \left(\bigoplus_{u=1}^{m} \theta_u(r) J\right) \oplus 0,
+     \label{eq:appendix-block-A}\\
+  R_{\mathrm{STR}}(r)
+    &= U \left[\left(\bigoplus_{u=1}^{m} R_2\big(\theta_u(r)\big)\right) \oplus I_{d_{\mathrm{null}}}\right] U^\top,
+     \label{eq:appendix-block-R}\\
+  R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s)
+    &= R_{\mathrm{STR}}(s-r).
+     \label{eq:appendix-relative-rotation}
+\end{align}
+Consequently $R_{\mathrm{STR}}(r)\in SO(d_h)$ and $R_{\mathrm{STR}}(r)\Pi_{\mathrm{act}} = \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r)$.
+\end{lemma}
+
+\begin{proof}
+Equation \eqref{eq:appendix-block-A} follows immediately by inserting \eqref{eq:appendix-block-L} into the definition
+of $A(r)$ in \eqref{eq:appendix-def-A-R}.  Because $J^2 = -I_2$ we have, for each $u$,
+\[
+  \exp\!\big(\theta_u(r) J\big)
+  = \sum_{n=0}^\infty \frac{\theta_u(r)^n J^n}{n!}
+  = \begin{cases}
+      \sum_{k=0}^\infty \frac{(-1)^k \theta_u(r)^{2k}}{(2k)!} I_2
+        + \sum_{k=0}^\infty \frac{(-1)^k \theta_u(r)^{2k+1}}{(2k+1)!} J,
+        &\text{if }n\text{ even/odd}\\[4pt]
+    \end{cases}
+  = R_2\big(\theta_u(r)\big),
+\]
+where the final equality collects the cosine and sine series.  Conjugating back by $U$ yields
+\eqref{eq:appendix-block-R}.  In particular, each block has determinant $1$ and orthogonal columns, so
+$R_{\mathrm{STR}}(r)\in SO(d_h)$.  Moreover, \eqref{eq:appendix-block-A} implies $A(r)A(s) = A(s)A(r)$ for
+all $r,s$ because the blocks commute, hence the Baker--Campbell--Hausdorff series
+truncates and we obtain
+\begin{align}
+  R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s)
+  &= \exp\!\big(-A(r)\big) \exp\!\big(A(s)\big)
+   = \exp\!\big(A(s) - A(r)\big)
+   = R_{\mathrm{STR}}(s-r),
+\end{align}
+which is \eqref{eq:appendix-relative-rotation}.  Finally, the block form \eqref{eq:appendix-block-R}
+shows that $R_{\mathrm{STR}}(r)$ acts as the identity on the null block, so it commutes with
+$\Pi_{\mathrm{act}}$.
+\end{proof}
+
+\subsection*{F.3\quad Proof of Lemma~3 (Cayley Post-Rotations)}
+
+\begin{lemma}\label{lem:appendix-cayley}
+Let $S\in\Real^{d_h\times d_h}$ be skew-symmetric and define the Cayley transform
+$P_{\mathrm{sp}} = (I-S)(I+S)^{-1}$.  Then $P_{\mathrm{sp}}\in SO(d_h)$.  Moreover, when
+$P_{\mathrm{sp}}$ belongs to the structured family
+\begin{equation}
+  \mathcal{A}
+  \coloneqq
+  \Bigl\{ U\,\mathrm{diag}(I_{2m}, R_{\mathrm{null}})\,U^\top \mid R_{\mathrm{null}}\in SO(d_{\mathrm{null}}) \Bigr\},
+  \label{eq:appendix-structured-A}
+\end{equation}
+the active projection is preserved: $\Pi_{\mathrm{act}} P_{\mathrm{sp}} \Pi_{\mathrm{act}} = \Pi_{\mathrm{act}}$.
+\end{lemma}
+
+\begin{proof}
+Because the eigenvalues of a real skew-symmetric matrix are purely imaginary, $1+i\mu \ne 0$ for every
+eigenvalue $i\mu$ of $S$, so $(I+S)$ is invertible.  We compute
+\begin{align}
+  P_{\mathrm{sp}}^\top P_{\mathrm{sp}}
+    &= (I+S)^{-\top} (I-S)^\top (I-S) (I+S)^{-1}\\
+    &= (I-S^\top)^{-1} (I+S^\top) (I-S) (I+S)^{-1}\\
+    &= (I+S)^{-1} (I+S) (I-S) (I+S)^{-1} = I,
+\end{align}
+where Skew-symmetry ($S^\top=-S$) and the commutativity of $I\pm S$ are used in the second equality.
+Likewise the determinant evaluates to
+\begin{equation}
+  \det(P_{\mathrm{sp}})
+  = \frac{\det(I-S)}{\det(I+S)}
+  = \prod_{u=1}^{d_h} \frac{1-i\mu_u}{1+i\mu_u} = 1,
+\end{equation}
+showing $P_{\mathrm{sp}}\in SO(d_h)$.  If $P_{\mathrm{sp}}\in\mathcal{A}$ its block form relative to $U$
+reads $\mathrm{diag}(I_{2m}, R_{\mathrm{null}})$, hence the active-portion is fixed pointwise and
+$\Pi_{\mathrm{act}} P_{\mathrm{sp}} \Pi_{\mathrm{act}} = \Pi_{\mathrm{act}}$.
+\end{proof}
+
+Given such a structured post-rotation we set
+\begin{equation}
+  R_{\mathrm{sp}}(r) \coloneqq R_{\mathrm{STR}}(r) P_{\mathrm{sp}},
+  \label{eq:appendix-Rsp}
+\end{equation}
+which remains in $SO(d_h)$ and inherits the relative-rotation law on the active subspace by
+Lemma~\ref{lem:appendix-structured-exponential}.
+
+\subsection*{F.4\quad Proof of Theorem~1 (Relative Attention Logits)}
+
+Let $W_Q,W_K,W_V \in \Real^{d_h\times D}$ be query, key, and value projections.  For tokens
+$x_i,x_j\in\Real^{D}$ and associated displacements $r_i,r_j\in\Real^{d_c}$ define
+\begin{align}
+  q_i &= W_Q x_i,
+  &
+  k_j &= W_K x_j,
+  &
+  v_j &= W_V x_j,
+\end{align}
+and project onto the active subspace to obtain
+\begin{align}
+  q_i^{(\mathrm{act})} &= \Pi_{\mathrm{act}} q_i,
+  &
+  k_j^{(\mathrm{act})} &= \Pi_{\mathrm{act}} k_j.
+\end{align}
+The structured rotation and projection yield modified query/key pairs
+\begin{equation}
+  \tilde q_i = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i) q_i^{(\mathrm{act})},
+  \qquad
+  \tilde k_j = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j) k_j^{(\mathrm{act})},
+  \label{eq:appendix-tilde-qk}
+\end{equation}
+and the attention logit is $\alpha_{ij} = \tfrac{1}{\sqrt{d_{\mathrm{act}}}}\,\tilde q_i^\top \tilde k_j$ with
+$d_{\mathrm{act}} = 2m$.
+
+\begin{theorem}\label{thm:appendix-relative-logits}
+If $P_{\mathrm{sp}}\in\mathcal{A}$, then
+\begin{equation}
+  \alpha_{ij}
+  = \frac{1}{\sqrt{2m}}
+    (q_i^{(\mathrm{act})})^\top
+    \Bigl(\Pi_{\mathrm{act}}\,R_{\mathrm{STR}}(r_j - r_i)\,\Pi_{\mathrm{act}}\Bigr)
+    k_j^{(\mathrm{act})},
+  \label{eq:appendix-relative-logits}
+\end{equation}
+so the logit depends only on the displacement $r_j - r_i$.
+\end{theorem}
+
+\begin{proof}
+Substituting \eqref{eq:appendix-tilde-qk} and using $\Pi_{\mathrm{act}}^\top = \Pi_{\mathrm{act}}$ yields
+\begin{align}
+  \alpha_{ij}
+  &= \frac{1}{\sqrt{2m}}
+     (q_i^{(\mathrm{act})})^\top
+     \bigl(\Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i)\bigr)^\top
+     \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j)
+     k_j^{(\mathrm{act})}.
+\end{align}
+Lemma~\ref{lem:appendix-cayley} ensures $\Pi_{\mathrm{act}} R_{\mathrm{sp}}(r) \Pi_{\mathrm{act}} =
+\Pi_{\mathrm{act}} R_{\mathrm{STR}}(r) \Pi_{\mathrm{act}}$ whenever $P_{\mathrm{sp}}\in\mathcal{A}$, so we may replace
+the post-rotations.  Lemma~\ref{lem:appendix-structured-exponential} then gives the relative-rotation identity
+$R_{\mathrm{STR}}(r_i)^\top R_{\mathrm{STR}}(r_j) = R_{\mathrm{STR}}(r_j - r_i)$ and the commutation
+with $\Pi_{\mathrm{act}}$, proving \eqref{eq:appendix-relative-logits}.
+\end{proof}
+
+\subsection*{F.5\quad Proof of Theorem~2 (Robustness to Approximate Symmetry)}
+
+To quantify deviations from the ideal assumptions we introduce the commutator bounds
+\begin{equation}
+  \varepsilon_{ab} \coloneqq \bigl\|[L_a,L_b]\bigr\|,
+  \qquad
+  \varepsilon \coloneqq \max_{a,b} \varepsilon_{ab},
+  \label{eq:appendix-epsilon}
+\end{equation}
+and measure active/null mixing of the post-rotation by writing
+$P_{\mathrm{sp}} = U \begin{psmallmatrix} A & B\\ C & D \end{psmallmatrix} U^\top$ and defining
+\begin{equation}
+  \eta_{\mathrm{mix}} \coloneqq \|B\| + \|C\|.
+  \label{eq:appendix-eta-mix}
+\end{equation}
+The active components are again denoted $q_i^{(\mathrm{act})}$ and $k_j^{(\mathrm{act})}$.
+
+\begin{theorem}\label{thm:appendix-robust-logits}
+There exists an absolute constant $C>0$ such that, for all $i,j$,
+\begin{equation}
+  \left|\alpha_{ij}
+    - \frac{1}{\sqrt{2m}}
+      (q_i^{(\mathrm{act})})^\top
+      \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j - r_i) \Pi_{\mathrm{act}}
+      k_j^{(\mathrm{act})}\right|
+  \le
+  C\Bigl(\varepsilon \|r_i\|_1 \|r_j\|_1 + \eta_{\mathrm{mix}}\Bigr)
+    \|q_i^{(\mathrm{act})}\|\,\|k_j^{(\mathrm{act})}\|.
+  \label{eq:appendix-robust-bound}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+The Baker--Campbell--Hausdorff expansion gives an explicit series for the log of a product.  Because
+$A(r)$ and $A(s)$ almost commute, we may bound the error by keeping the leading commutator term:
+\begin{align}
+  \bigl\|R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s) - R_{\mathrm{STR}}(s-r)\bigr\|
+  &= \bigl\|\exp(-A(r)) \exp(A(s)) - \exp(A(s)-A(r))\bigr\|\\
+  &\le \frac{1}{2} \|[A(r),A(s)]\| + C_1 \|[A(r),A(s)]\|^2\\
+  &\le \Bigl(\frac{1}{2} + C_1 \|[A(r),A(s)]\|\Bigr)
+        \sum_{a,b} |r_a|\,|s_b|\,\varepsilon_{ab}\\
+  &\le C_2\,\varepsilon\,\|r\|_1 \|s\|_1,
+\end{align}
+for absolute constants $C_1,C_2$.  Similarly, writing $S = S_- + E$ with $S_-^\top = -S_-$ and
+$\|E\| \le \eta < 1$, a Neumann-series argument shows that
+\begin{equation}
+  \|(I+S)^{-1} - (I+S_-)^{-1}\|
+  = \|(I+S)^{-1} (S - S_-) (I + S_-)^{-1}\|
+  \le \frac{\eta}{1-\eta},
+\end{equation}
+and consequently the Cayley transforms satisfy
+\begin{equation}
+  \|P_{\mathrm{sp}}(S) - P_{\mathrm{sp}}(S_-)\| \le C_3 \eta
+\end{equation}
+for some $C_3$.  Because $P_{\mathrm{sp}}$ lies within $\eta_{\mathrm{mix}}$ of $\mathcal{A}$, the active block
+differs from the identity by at most $C_4 \eta_{\mathrm{mix}}$, and the projection of
+$R_{\mathrm{sp}}(r)$ consequently differs from that of $R_{\mathrm{STR}}(r)$ by the same order.  Inserting
+these estimates in the expression for $\alpha_{ij}$ and applying the triangle inequality produces
+\eqref{eq:appendix-robust-bound}, where $C$ absorbs the universal constants.
+\end{proof}
+
+\subsection*{F.6\quad Discussion}
+
+Theorem~\ref{thm:appendix-relative-logits} demonstrates that, under exact commuting generators and
+structured post-rotations, the attention logits depend solely on relative displacements.  The robust
+estimate in Theorem~\ref{thm:appendix-robust-logits} quantifies how violations of the commutation
+assumption and leakage between active and null subspaces perturb this behaviour: non-commuting
+generators introduce an error term proportional to $\varepsilon\,\|r_i\|_1\|r_j\|_1$, while imperfect
+post-rotations contribute an additive term controlled by $\eta_{\mathrm{mix}}$.
+
+
+\end{document}
+
+
