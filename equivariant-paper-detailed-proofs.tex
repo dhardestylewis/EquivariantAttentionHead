@@ -466,3 +466,77 @@ k_j^{(\mathrm{act})}\\
 }{T5.10,T0.12,T5.1,T5.8,T4.2,T2.10}
 
 \end{document}
+\section{Tier 7: Positive Random Features and Variance Bounds}
+
+\ProofBlock{T7.0:\mathcal{N}(0,I_n),\mathbb{E},\mathrm{Var}}{
+\mathcal{N}(0,I_n) \eqdef \text{the mean-zero Gaussian law on }\Real^n\text{ with density } (2\pi)^{-n/2}\exp\!\big(-\tfrac12|w|^2\big)\\[4pt]
+w\sim\mathcal{N}(0,I_n) \Rightarrow \mathbb{E}[w] = 0,\quad \mathbb{E}[w w^\top] = I_n\\[4pt]
+\mathbb{E}[\cdot] \eqdef \text{expectation with respect to the (joint) law of all Gaussian draws }w\\
+\mathrm{Var}[Z] \eqdef \mathbb{E}[Z^2] - (\mathbb{E}[Z])^2 \quad\text{for any scalar random variable }Z
+}{T0.9,T0.3,T0.1}
+
+\ProofBlock{T7.1:\mathrm{RF\ setup}}{
+d_{\mathrm{act}} = 2m \text{ from T2.10}\\[4pt]
+	ext{For probabilistic estimates we draw } w \sim \mathcal{N}(0,I_{d_{\mathrm{act}}}) \text{ in the sense of T7.0}\\[4pt]
+\phi_w(x) \eqdef \exp\!\Big(w^\top x - \tfrac12 |x|^2\Big) \quad (x\in\Real^{d_{\mathrm{act}}})\\
+\Note{positive softmax random feature map as in FAVOR\,+ estimators}\\[4pt]
+Z(x,y;w) \eqdef \phi_w(x)\,\phi_w(y) = \exp\!\Big(w^\top(x+y) - \tfrac12(|x|^2+|y|^2)\Big) \quad (x,y\in\Real^{d_{\mathrm{act}}})\\[4pt]
+\widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(x,y) \eqdef \frac{1}{n_{\mathrm{rf}}} \sum_{t=1}^{n_{\mathrm{rf}}} Z(x,y;w_t) \quad \text{for }n_{\mathrm{rf}}\in\mathbb{N},\ w_t \text{ i.i.d. } \mathcal{N}(0,I_{d_{\mathrm{act}}})\\[4pt]
+\Note{ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(x,y) \text{ is our Monte Carlo estimator of } \exp(x^\top y) \text{ (unnormalized softmax kernel)} }
+}{T2.10,T7.0,T0.3,T0.9,T0.1}
+
+\ProofBlock{T7.2:\widehat q_i,\widehat k_j,\alpha_{ij}}{
+	ilde q_i,\tilde k_j \text{ from T4.3},\quad q_i^{(\mathrm{act})},k_j^{(\mathrm{act})} \text{ from T4.2}\\[4pt]
+\alpha_{ij} \eqdef \frac{1}{\sqrt{d_{\mathrm{act}}}}\tilde q_i^\top \tilde k_j \quad\text{from T4.4 and T2.10}\\[4pt]
+\widehat q_i \eqdef d_{\mathrm{act}}^{-1/4}\,\tilde q_i, \quad \widehat k_j \eqdef d_{\mathrm{act}}^{-1/4}\,\tilde k_j\\[4pt]
+\widehat q_i^\top \widehat k_j = (d_{\mathrm{act}}^{-1/4}\tilde q_i)^\top (d_{\mathrm{act}}^{-1/4}\tilde k_j) = d_{\mathrm{act}}^{-1/2} \tilde q_i^\top \tilde k_j = \alpha_{ij}\\[4pt]
+\Rightarrow \alpha_{ij} = \widehat q_i^\top \widehat k_j\\[4pt]
+\Note{ The attention logit \(\alpha_{ij}\) is \emph{exactly} a Euclidean dot product between \(\widehat q_i,\widehat k_j \in \Real^{d_{\mathrm{act}}}\), with no remaining \(\tfrac{1}{\sqrt{d_{\mathrm{act}}}}\) factor. }
+}{T4.3,T4.4,T4.2,T2.10,T0.9,T0.1}
+
+\ProofBlock{T7.3:\mathbb{E}Z=\exp(x^\top y),\text{unbiasedness}}{
+	ext{Fix } x,y\in\Real^{d_{\mathrm{act}}}. \ Z(x,y;w) = \exp\!\Big( w^\top(x+y) - \tfrac12(|x|^2+|y|^2) \Big)\\[4pt]
+	ext{For } w\sim\mathcal{N}(0,I_{d_{\mathrm{act}}}) \text{ (T7.0), } w^\top(x+y) \text{ is scalar Gaussian with mean }0\text{ and variance }|x+y|^2.\\[4pt]
+\mathbb{E}_w\big[\exp(u^\top w)\big] = \exp\!\Big(\tfrac12|u|^2\Big) \quad \text{for any fixed }u\in\Real^{d_{\mathrm{act}}} \text{ (Gaussian MGF).}\\[4pt]
+\Rightarrow \mathbb{E}[Z(x,y;w)] = \exp\!\Big( \tfrac12|x+y|^2 - \tfrac12(|x|^2+|y|^2) \Big)\\[4pt]
+|x+y|^2 = |x|^2+|y|^2+2 x^\top y \quad\text{(T0.9 inner-product expansion)}\\[4pt]
+\Rightarrow \mathbb{E}[Z(x,y;w)] = \exp\!\Big( \tfrac12(|x|^2+|y|^2+2 x^\top y) - \tfrac12(|x|^2+|y|^2) \Big) = \exp(x^\top y)\\[6pt]
+	ext{Now choose } x=\widehat q_i,\ y=\widehat k_j \text{ from T7.2. Then } x^\top y = \alpha_{ij}.\\[4pt]
+\Rightarrow \mathbb{E}[Z(\widehat q_i,\widehat k_j;w)] = \exp(\alpha_{ij})\\[6pt]
+\Rightarrow \mathbb{E}\Big[ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(\widehat q_i,\widehat k_j) \Big] = \frac{1}{n_{\mathrm{rf}}} \sum_{t=1}^{n_{\mathrm{rf}}} \mathbb{E}[Z(\widehat q_i,\widehat k_j;w_t)] = \exp(\alpha_{ij})\\[6pt]
+\Note{ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(\widehat q_i,\widehat k_j) is an \emph{unbiased} positive estimator of \(\exp(\alpha_{ij})\), the \emph{unnormalized} softmax score. No claim is made here about the unbiasedness of the \emph{normalized} attention weight \(\exp(\alpha_{ij})/\sum_{j'}\exp(\alpha_{ij'})\), because that introduces a random denominator. }
+}{T7.1,T7.2,T7.0,T0.9,T0.11}
+
+\ProofBlock{T7.4:\mathbb{E}Z^2,\mathrm{Var}Z,\text{closed form}}{
+	ext{Continue with fixed } x,y\in\Real^{d_{\mathrm{act}}}.\\[4pt]
+Z(x,y;w) = \exp\!\Big( w^\top(x+y) - \tfrac12(|x|^2+|y|^2) \Big)\\
+Z(x,y;w)^2 = \exp\!\Big( 2w^\top(x+y) - (|x|^2+|y|^2) \Big)\\[4pt]
+\mathbb{E}[Z(x,y;w)^2] = \exp\!\Big( \tfrac12|2(x+y)|^2 - (|x|^2+|y|^2) \Big) = \exp\!\Big( 2|x+y|^2 - (|x|^2+|y|^2) \Big)\\[4pt]
+|x+y|^2 = |x|^2+|y|^2+2 x^\top y \text{ (as used in T7.3)}\\[4pt]
+\Rightarrow 2|x+y|^2 - (|x|^2+|y|^2) = 2(|x|^2+|y|^2+2 x^\top y) - (|x|^2+|y|^2) = |x|^2 + |y|^2 + 4 x^\top y\\[4pt]
+\Rightarrow \mathbb{E}[Z(x,y;w)^2] = \exp\!\Big( |x|^2 + |y|^2 + 4 x^\top y \Big)\\[6pt]
+\mathbb{E}[Z(x,y;w)] = \exp(x^\top y) \quad\text{from T7.3}\\
+(\mathbb{E}[Z(x,y;w)])^2 = \exp(2 x^\top y)\\[4pt]
+\mathrm{Var}[Z(x,y;w)] = \mathbb{E}[Z(x,y;w)^2] - (\mathbb{E}[Z(x,y;w)])^2\\[2pt]
+= \exp\!\Big( |x|^2 + |y|^2 + 4 x^\top y \Big) - \exp\!\Big( 2 x^\top y \Big)\\[6pt]
+\mathrm{Var}[Z(x,y;w)] = \exp\!\Big( 2 x^\top y \Big) \Big[ \exp\!\Big( |x|^2 + |y|^2 + 2 x^\top y \Big) - 1 \Big]\\[4pt]
+\Note{ The single-sample variance is finite and given in closed form for all finite \(x,y\). }
+}{T7.3,T7.1,T7.0,T0.9}
+
+\ProofBlock{T7.5:\mathrm{Var}\ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}},\text{geom link}}{
+	ext{The draws } w_t \text{ in T7.1 are i.i.d., so the } Z(\cdot;w_t) \text{ are i.i.d.}\\[4pt]
+\widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(x,y) = \frac{1}{n_{\mathrm{rf}}} \sum_{t=1}^{n_{\mathrm{rf}}} Z(x,y;w_t)\\[4pt]
+\mathrm{Var}\Big[ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(x,y) \Big] = \frac{1}{n_{\mathrm{rf}}^2} \sum_{t=1}^{n_{\mathrm{rf}}} \mathrm{Var}[Z(x,y;w_t)] = \frac{1}{n_{\mathrm{rf}}} \mathrm{Var}[Z(x,y;w)] \quad\text{(i.i.d.\ variance scaling)}\\[6pt]
+	ext{Insert the expression from T7.4:}\\[4pt]
+\mathrm{Var}\Big[ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(x,y) \Big] = \frac{1}{n_{\mathrm{rf}}} \exp\!\Big( 2 x^\top y \Big) \Big[ \exp\!\Big( |x|^2+|y|^2+2 x^\top y \Big) - 1 \Big]\\[6pt]
+	ext{Now specialise } x=\widehat q_i,\ y=\widehat k_j \text{ from T7.2. Then } x^\top y = \alpha_{ij}.\\[4pt]
+\Rightarrow \mathrm{Var}\Big[ \widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(\widehat q_i,\widehat k_j) \Big] = \frac{1}{n_{\mathrm{rf}}} \exp\!\Big( 2 \alpha_{ij} \Big) \Big[ \exp\!\Big( |\widehat q_i|^2+|\widehat k_j|^2+2 \alpha_{ij} \Big) - 1 \Big]\\[6pt]
+	ext{Relate } |\widehat q_i|,|\widehat k_j| \text{ back to geometric quantities already controlled in T5.10.}\\[4pt]
+\widehat q_i = d_{\mathrm{act}}^{-1/4}\tilde q_i,\quad \widehat k_j = d_{\mathrm{act}}^{-1/4}\tilde k_j \text{ from T7.2} \Rightarrow |\widehat q_i|^2 + |\widehat k_j|^2 = d_{\mathrm{act}}^{-1/2} (|\tilde q_i|^2+|\tilde k_j|^2)\\[4pt]
+	ilde q_i = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i) q_i^{(\mathrm{act})} \text{ and } \tilde k_j = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j) k_j^{(\mathrm{act})} \text{ from T4.3.}\\[4pt]
+R_{\mathrm{sp}}(r) \in SO(d_h) \text{ (T3.5) so } |R_{\mathrm{sp}}(r)z| = |z| \text{ for all }z\in\Real^{d_h},\\
+\Pi_{\mathrm{act}} \text{ is an orthogonal projector (T2.10) so } |\Pi_{\mathrm{act}} z|\le |z| \text{ for all }z.\\[4pt]
+\Rightarrow |\tilde q_i| \le |q_i^{(\mathrm{act})}|, \quad |\tilde k_j| \le |k_j^{(\mathrm{act})}|\\[4pt]
+\Rightarrow |\tilde q_i|^2 + |\tilde k_j|^2 \le |q_i^{(\mathrm{act})}|^2 + |k_j^{(\mathrm{act})}|^2\\[6pt]
+\Note{ 1) The estimator \(\widehat{\mathrm{SM}}_{n_{\mathrm{rf}}}(\widehat q_i,\widehat k_j)\) is unbiased for \(\exp(\alpha_{ij})\) (T7.3).\\[4pt] 2) Its variance decays exactly as \(1/n_{\mathrm{rf}}\).\\[4pt] 3) The variance prefactor depends on \(\alpha_{ij}\), \(|\widehat q_i|^2+|\widehat k_j|^2 = d_{\mathrm{act}}^{-1/2}(|\tilde q_i|^2+|\tilde k_j|^2)\), and thus is controlled by \(|q_i^{(\mathrm{act})}|\) and \(|k_j^{(\mathrm{act})}|\), which already enter the geometric stability bound T5.10.\\[4pt] 4) Under standard attention scaling, \(\alpha_{ij} = O(1)\) as \(d_{\mathrm{act}}\) grows, and \(|q_i^{(\mathrm{act})}|\), \(|k_j^{(\mathrm{act})}|\) scale so that \(|\widehat q_i|^2\) and \(|\widehat k_j|^2\) remain \(O(1)\). Hence the exponential factor in the variance is not pathological. }
+}{T7.4,T7.2,T7.1,T4.3,T4.2,T3.5,T2.10,T0.9,T0.3,T0.6}
