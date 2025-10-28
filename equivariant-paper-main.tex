@@ -52,7 +52,6 @@ We revisit this design space from two complementary angles. First, we provide a 
   \item We formalize the structured rotation model. Any commuting family of real skew-symmetric generators admits a joint real block decomposition into $2\times 2$ rotational planes and a null subspace, which induces explicit orthogonal projectors onto an active subspace and its null complement.
   \item We prove that the induced exponentials $R_{\mathrm{STR}}(r) = \exp(A(r))$ implement relative rotations: $R_{\mathrm{STR}}(r_i)^\top R_{\mathrm{STR}}(r_j) = R_{\mathrm{STR}}(r_j - r_i)$. When the post-rotation lies in the structured family $\mathcal{A}$ (i.e., it is identity on the active subspace), the projected attention logits depend only on the displacement $r_j - r_i$.
   \item We derive stability bounds. If the generators only approximately commute and the post-rotation only approximately preserves the active subspace, then the deviation of the attention logits from perfect relative form is bounded by $\Delta_{ij} = C(\varepsilon |r_i|_1 |r_j|_1 + \eta_{\mathrm{mix}})\,|q_i^{(\mathrm{act})}|\,|k_j^{(\mathrm{act})}|$, i.e. it scales with commutator size $\varepsilon$, subspace leakage $\eta_{\mathrm{mix}}$, and query/key magnitudes.
-  \item (Planned / forthcoming.) We integrate positive orthogonal random feature maps with these structured rotations to obtain linear-time softmax attention. We analyze unbiasedness, variance, and finite-dimensional tail bounds for orthogonal ensembles.
 \end{enumerate}
 
 \section{Structured Positional Rotations}
