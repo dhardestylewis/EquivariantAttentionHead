@@ -442,6 +442,18 @@ assumption and leakage between active and null subspaces perturb this behaviour:
 generators introduce an error term proportional to $\varepsilon\,\|r_i\|_1\|r_j\|_1$, while imperfect
 post-rotations contribute an additive term controlled by $\eta_{\mathrm{mix}}$.
 
+\section*{Related Work}
+
+Recent work by Ashman et al.~\cite{ashman2024approximately} introduces a general framework for constructing approximately equivariant neural processes by augmenting equivariant architectures with learnable, fixed inputs. Their approach is architecture- and group-agnostic, and provides theoretical guarantees for approximating arbitrary operators with equivariant models plus additional parameters. While their method is general and touches on connections to positional encodings in transformers, it does not introduce or analyze the structured family of rotary position embeddings (RoPE) or the algebraic generalizations developed in this work. Our results on equivariant structured positional rotations, explicit block decompositions, and robust stability bounds are complementary and distinct, providing a new model family and theoretical guarantees for relative-position attention mechanisms.
+
+% Bibliography
+\begin{thebibliography}{9}
+\bibitem{ashman2024approximately}
+Matthew Ashman, Wessel Bruinsma, Cristiana Diaconu, Adrian Weller, and Richard E. Turner.
+\newblock Approximately Equivariant Neural Processes.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2024.
+\newblock \url{https://proceedings.neurips.cc/paper_files/paper/2024/file/b00ef390dcd5f147fd7c5c2bb35f09be-Paper-Conference.pdf}
+\end{thebibliography}
 
 \end{document}
 
