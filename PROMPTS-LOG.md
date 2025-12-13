@@ -50,3 +50,11 @@
 ## 2025-12-13 14:54 - Continue Session
 
 > continue beyond Qian
+
+## 2025-12-13 14:55 - String Drafts Organization
+
+> place string draft detailed and string draft main into their own dir for both
+
+## 2025-12-13 14:56 - Reference Naming Convention
+
+> instead of marking -reference mark -REFERENCE each of these references
