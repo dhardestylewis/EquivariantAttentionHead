@@ -1,10 +1,9 @@
-- [x] Scaffold LaTeX workspace
-  - Create project skeleton and add initial files: `main.tex`, `README.md`, `build.ps1`, and `.vscode/extensions.json`.
-- [x] Insert provided math document
-  - Place the user's provided mathematical document into `main.tex` (initially as verbatim placeholder).
-- [x] Add build instructions
-  - Add `README.md` with instructions for installing a LaTeX distribution on Windows and how to run `pdflatex` via PowerShell; add `build.ps1` to run the build.
-- [ ] Typeset cleanup (optional)
-  - (Optional) Convert verbatim to proper LaTeX math environments and run `pdflatex` to produce `main.pdf` — request confirmation before doing this.
-- [x] Typeset cleanup (optional)
-  - (Optional) Convert verbatim to proper LaTeX math environments and run `pdflatex` to produce `main.pdf` — request confirmation before doing this.
+- [x] Scaffold LaTeX workspace (Completed: 2025-12-13 14:00)
+- [x] Insert provided math document (Completed: 2025-12-13 14:00)
+- [x] Add build instructions (Completed: 2025-12-13 14:00)
+- [x] Adopt Master Project Guidelines and Log Prompts (UNREVIEWED) [Added: 2025-12-13 14:26] (Completed: 2025-12-13 14:26)
+- [x] Refine `robust-rotary-robustness.tex` to 'narrow' STRING scope (UNREVIEWED) [Added: 2025-12-13 14:21] (Completed: 2025-12-13 14:28)
+- [x] Organize reference papers into `papers/reference` (UNREVIEWED) [Added: 2025-12-13 14:25] (Completed: 2025-12-13 14:28)
+- [x] Move PDF papers to `.d` directories and generate TXT (UNREVIEWED) [Added: 2025-12-13 14:29] (Completed: 2025-12-13 14:30)
+- [x] Reorganize and rename `robust-rotary-robustness.tex` to `string-robustness.d` (UNREVIEWED) [Added: 2025-12-13 14:30] (Completed: 2025-12-13 14:31)
+- [x] Verify all papers have corresponding `.txt` transcripts (UNREVIEWED) [Added: 2025-12-13 14:30] (Completed: 2025-12-13 14:31)

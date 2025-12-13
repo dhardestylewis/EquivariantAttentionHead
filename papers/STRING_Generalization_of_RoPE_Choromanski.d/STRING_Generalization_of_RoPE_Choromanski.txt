@@ -1,0 +1,1349 @@
+Upper Bounding Barlow Twins: A Novel Filter for Multi-Relational Clustering
+Xiaowei Qian1 * , Bingheng Li1 * , Zhao Kang1†
+
+arXiv:2312.14066v1 [cs.LG] 21 Dec 2023
+
+1
+
+University of Electronic Science and Technology of China, Chengdu, Sichuan, China
+{xiaoweiqian0311, bingheng86}@gmail.com, zkang@uestc.edu.cn
+
+Abstract
+Multi-relational clustering is a challenging task due to the
+fact that diverse semantic information conveyed in multilayer graphs is difficult to extract and fuse. Recent methods
+integrate topology structure and node attribute information
+through graph filtering. However, they often use a low-pass
+filter without fully considering the correlation among multiple graphs. To overcome this drawback, we propose to learn
+a graph filter motivated by the theoretical analysis of Barlow
+Twins. We find that input with a negative semi-definite inner
+product provides a lower bound for Barlow Twins loss, which
+prevents it from reaching a better solution. We thus learn a filter that yields an upper bound for Barlow Twins. Afterward,
+we design a simple clustering architecture and demonstrate its
+state-of-the-art performance on four benchmark datasets. The
+source code is available at https://github.com/XweiQ/BTGF.
+
+Introduction
+The advancements in information technology have led
+to a substantial proliferation of complex data, e.g., nonEuclidean graphs and multi-view data. Data originating
+from a variety of sources, each of which exhibits different
+characteristics, are often referred to as multi-view data. As a
+special type of multi-view data, multi-relational graphs contain two or more relations over a vertex set (Qu et al. 2017).
+For instance, in the case of social networks, users and their
+profiles are considered as nodes and attributes, where each
+user interacts with others through multiple types of relationships such as friendship, colleague, and co-following.
+Clustering is a practical technique to handle rich multirelational graphs by finding a unique cluster pattern of
+nodes. One principle underlying multi-relational clustering is to leverage consistency and complementarity among
+multiple views to achieve good performance. For example,
+SwMC (Nie et al. 2017) learns a shared graph from multiple graphs by using a weighting strategy; O2MAC (Fan
+et al. 2020) extracts shared representations across multiple
+views from the most informative graph; MCGC (Pan and
+Kang 2021) utilizes a set of adaptive weights to learn a highquality graph from the original multi-relational graphs. A
+* These authors contributed equally.
+†
+
+Corresponding author
+Copyright © 2024, Association for the Advancement of Artificial
+Intelligence (www.aaai.org). All rights reserved.
+
+key component of these methods is graph filtering, which
+fuses the topology structure and attribute information. They
+show that impressive performance can be achieved even
+without using neural networks (Lin et al. 2023; Pan and
+Kang 2023b). This provides a smart way for traditional machine learning methods to benefit from representation learning techniques. Nevertheless, they simply use a low-pass filter without fully considering the correlation between different views. Moreover, these filters are empirically designed
+and fixed, which is not flexible to suit different data.
+How to explore the correlation among multiple graphs is a
+critical problem in multi-view learning. Lyu et al (Lyu et al.
+2022) theoretically illustrate that the correlation-based objective functions are effective in extracting shared and private information in multi-view data under some assumptions. Among them, Barlow Twins (Zbontar et al. 2021) is
+particularly popular. It consists of two parts: the invariance
+term maximizes the correlation between the same feature
+across different views, while the redundancy term decorrelates different features across various views. The feature
+decorrelation operation not only exploits the correlation of
+multiple views but also effectively alleviates the problem of
+representation collapse in self-supervised learning. This idea
+has been applied to graph clustering, such as MVGC (Xia
+et al. 2022) and MGDCR (Mo et al. 2023). However, existing methods simply use Barlow Twins, without any special
+operations catering to multi-relational graphs. Consequently,
+they still suffer from collapse. To show this, we visualize
+the feature distributions of several representative methods
+in ACM data: contrastive learning-based method MGCCN
+(Liu et al. 2022b), Barlow Twins-based method MGDCR
+(Mo et al. 2023), and our proposed method Barlow Twins
+Guided Filter (BTGF). Comparing Figs. 1(a) and 1(b), we
+can observe the advantage of Barlow Twins. From Figs.
+1(b) and 1(c), a more evident enhancement in BTGF can
+be found.
+In this work, we reveal that an input with a negative semidefinite inner product will lead to a lower bound for Barlow
+Twins loss, while an input with a positive semi-definite inner product has an upper bound. To minimize Barlow Twins
+loss as much as possible, we employ a graph filter to make
+the inner product positive semi-definite. Therefore, our filter
+upper bounds Barlow Twins, which means that the loss will
+never be too large to dominate other terms.
+
+(a) MGCCN
+
+(b) MGDCR
+
+(c) BTGF
+
+Figure 1: Visualization of representation distributions utilizing Gaussian Kernel Density Estimation (KDE) (Botev, Grotowski,
+and Kroese 2010) on ACM. Representations are mapped onto a two-dimensional normalized vector through t-SNE. A darker
+color indicates a higher concentration of points within the area. A better collapse mitigation method makes the feature distributions more uniform.
+The overall architecture for multi-relational clustering is
+displayed in Fig. 2. The learned graph filter aggregates information for each node from its neighbors, resulting in smooth
+representations. They serve as input to an encoder, which
+maps them into a clustering-favorable space. Subsequently,
+they are reconstructed by a decoder. After training, clustering results are obtained using the output of the encoder.
+The main contributions of this paper can be summarized
+in three aspects:
+• We conduct a theoretical analysis to examine how the
+input affects the optimization of Barlow Twins. An input with a negative semi-definite inner product provides
+a lower bound for Barlow Twins loss, while an input
+with a positive semi-definite inner product yields an upper bound.
+• A graph filter that facilitates Barlow Twins optimization
+is designed. This filter ensures that the inner product of
+the encoder input is positive semi-definite, which enables
+Barlow Twins to have an upper bound and surpass the
+lower bound, leading to improved performance.
+• A simple yet effective clustering architecture is developed. Experimental results on four multi-relational graph
+datasets demonstrate the superiority of BTGF, even when
+the network just employs a linear layer.
+
+Related Work
+In recent years, numerous multi-view graph clustering methods have been proposed. Shallow methods MvAGC (Lin and
+Kang 2021) and MCGC (Pan and Kang 2021) employ a lowpass filter to embed relation information into attributes, and
+have achieved impressive results. Nevertheless, they just use
+a simple weight to differentiate various views and don’t explicitly consider the correlations among different views.
+Distinct from the shallow methods described above, deep
+methods attempt to learn good representations via designed
+neural networks. O2MAC (Fan et al. 2020) and MAGCN
+(Cheng et al. 2021) cluster multi-relational graphs using
+GCN. CMGEC (Wang et al. 2021b) applies mutual information maximization to capture complementary and con-
+
+sistent information of each view. HAN (Wang et al. 2019)
+and HDMI (Jing, Park, and Tong 2021) apply the attention mechanism to fuse different relations. Due to the importance of structure in different views (Fang et al. 2022),
+MGCCN (Liu et al. 2022a) introduces a contrastive learning mechanism to capture consistent information between
+diverse views. However, these methods could be subject to
+representation collapse.
+Two popular solutions to mitigate representation collapse
+are asymmetric model architecture, e.g., MoCo (He et al.
+2020), BYOL (Grill et al. 2020), SimSiam (Chen and He
+2021), and appropriate objective function, e.g., SimCLR
+(Chen et al. 2020), Barlow Twins (Zbontar et al. 2021).
+BT introduces a novel cross-correlation objective function
+for feature decorrelation. Owing to its concise implementation, without negative sample generation and asymmetric
+networks, it has gained popularity in self-supervised learning (Zhang et al. 2021, 2022). Graph Barlow Twins (Bielak,
+Kajdanowicz, and Chawla 2022) optimizes the embeddings
+of two distorted views of a graph. Clustering methods are
+also prone to collapse, e.g., empty clusters in K-means.
+DCRN (Liu et al. 2022b) extends the idea of Barlow Twins
+into deep clustering and designs a dual correlation reduction network to address representation collapse. However, it
+is a single-view model and cannot handle multi-relational
+graphs. DGCN (Pan and Kang 2023a) uses similar correlation reduction item to alleviate collapse. MVGC (Xia et al.
+2022) and MGDCR (Mo et al. 2023) directly apply Barlow
+Twins to multi-relational graphs. However, they suffer insufficient optimization. In this paper, we theoretically analyze
+the conditions for the existence of lower and upper bounds
+for Barlow Twins loss and design a new filter based on it.
+
+Methodology
+Notation
+Define the multi-relational graph as G
+=
+{V, E1 , . . . , EV , X}, where V represents the sets of n
+nodes, eij ∈ Ev denotes the relationship between node i
+and node j in the v-th view. V ≥ 1 is the number of rela-
+
+Clustering Assignment
+
+KL(P||Q)
+Low-pass Filter
+
+1-st view
+
+Concatenate
+
+v-th view’s Topology
+
+…
+
+Feature X
+
+V-th view
+
+Reconstruction Loss
+
+…
+Barlow Twins Guided Filter
+
+Pairwise
+
+Feature Reconstruction
+
+1. Multi-relational Graphs
+
+3. Clustering
+
+2. Filter Learning
+
+Figure 2: The proposed framework for multi-relational clustering.
+⊤
+
+tional graphs. X = {x1 , . . . , xn } ∈ Rn×f is the attribute
+matrix, f is the dimension of features. The adjacency matrix
+ev characterizes the initial graph structure of the v-th
+A
+view. Dv represents the degree matrices.
+The
+
+ normalized
+1
+−1
+ev + I (Dv )− 2 and
+adjacency matrix is Av = (Dv ) 2 A
+the corresponding graph Laplacian is Lv = I − Av . And c
+represents the number of node classes.
+
+Proposition 1. Barlow Twins has an explicit lower bound
+v
+v
+Pd
+Λii1 Λii2
+2
+v1
+)X)⊤ g(Lv2 )X is neg1 )max(Λv2 ) ) , if (g(L
+i=1 ( max(Λv
+ii
+ii
+ative semi-definite.
+Proof. Denote (g(Lv1 )X)⊤ g(Lv2 )X as H v1 ,v2 ∈ Rf ×f .
+M v1 ,v2 = (Λv1 )−1 W ⊤ (g(Lv1 )X)⊤ g(Lv2 )XW (Λv2 )−1
+= (Λv1 )−1 W ⊤ H v1 ,v2 W (Λv2 )−1 ,
+
+Barlow Twins Guided Filter
+To inject the topology structure into features, graph filtering
+is performed as:
+e v = g(Lv )X,
+X
+(1)
+v
+where g(L ) is the v-th view’s graph filter. Then, we represent the encoder as a multi-layer dimensional transformation
+W ∈ Rf ×d , where d is the output dimension of the embedding Z. We can express Z v as:
+Z v = g(Lv )XW.
+
+v1 ,v2
+LBT
+=
+
+1 ,v2
+LvBT
+=
+
+d
+X
+
+2
+
+(Miiv1 ,v2 − 1) + λ
+
+>
+(1.a)
+
+d
+X
+
+d X
+d
+X
+
+v1 ,v2 2
+(Mij
+)
+
+i=1 j̸=i
+2
+
+(Miiv1 ,v2 − 1)
+
+i=1
+
+d
+X
+=
+(
+
+1
+⊤ v1 ,v2
+W:i − 1)2
+v1 v2 W:i H
+Λ
+Λ
+ii ii
+i=1
+
+(2)
+
+d X
+d
+X
+v1 ,v2 2
+(Mij
+) ,
+
+2
+
+(Miiv1 ,v2 − 1) + λ
+
+i=1
+
+n×f
+
+Specifically, we aim to learn a single encoder h : R
+→
+ev)
+Rn×d for different views, i.e., the encoders Z v = h(X
+share the same parameters. Afterward, we compute Barlow
+Twins (BT) as follows:
+
+d
+X
+
+≥
+
+d
+X
+W ⊤ H v1 ,v2 W:i − Λvii1 Λvii2 2
+)
+( :i
+max(Λvii1 )max(Λvii2 )
+i=1
+d
+X
+(
+
+Λvii1 Λvii2
+2
+v1
+v2 ) ,
+max(Λ
+)max(Λ
+)
+(1.b)
+ii
+ii
+i=1
+≥
+
+(3)
+
+(4)
+where (1.a): λ > 0 and (1.b): Since H v1 ,v2 is negative
+semi-definite, we have W:i⊤ H v1 ,v2 W:i ≤ 0, which implies
+(W:i⊤ H v1 ,v2 W:i − Λvii1 Λvii2 )2 ≥ (Λvii1 Λvii2 )2 .
+
+where Ẑ v is the column-normalized form of Z v , i.e., Ẑ v =
+Z v (Λv )−1 , Λv is a diagonal matrix with positive elements
+∥Z:iv ∥. λ is a trade-off parameter that balances the invariance term and redundancy reduction term, which is fixed to
+0.0051 (Zbontar et al. 2021).
+To enhance the effectiveness of BT loss on multirelational graphs, we first provide some theoretical analysis.
+We find that the convergence of BT is influenced by the inner
+e v1 and X
+e v2 .
+product between X
+
+The optimization objective of BT is to make the diagonal elements converge to 1 and the off-diagonal elements converge to zero, thus driving the BT value close
+to zero. However, having a constant positive lower bound
+in Proposition. 1 undermines the capability of BT to effectively explore multi-view correlations and alleviate representation collapse. Additionally, clustering models often
+involve several loss terms for multi-objective optimization.
+Consequently, BT could be influenced by other losses during the training process, which makes it impossible to reach
+
+i=1
+v1 ,v2
+Mij
+=
+
+i=1 j̸=i
+
+Z:iv1 ⊤ Z:jv2
+∥Z:iv1 ∥ · Z:jv2
+
+= (Ẑ:iv1 )⊤ Ẑ:jv2 ,
+
+zero. To address this problem, we attempt to impose an upper bound on BT.
+Proposition 2. If H v1 ,v2 is a positive semi-definite
+matrix, Barlow Twins will be upper bound by d +
+Pd Pd
+v1 ,v2 2
+) .
+λ i=1 j̸=i (Mij
+Proof.
+1 ,v2
+LvBT
+=
+
+d
+X
+(
+
+1
+⊤ v1 ,v2
+W:i − 1)2
+v1 v2 W:i H
+Λ
+Λ
+ii
+ii
+i=1
+
++λ
+
+d X
+d
+X
+v1 ,v2 2
+)
+(Mij
+
+(5)
+
+i=1 j̸=i
+
+≤ d+λ
+(2.a)
+
+d X
+d
+X
+
+v1 ,v2 2
+) ,
+(Mij
+
+Then, the graph filter K v can be reformulated as follows:
+
+1
+1
+1
+K v = [ I − 2 X(I + X ⊤ X)−1 X ⊤ ] γφ(Lv ) + XX ⊤
+γ
+γ
+γ
+
+⊤
+X(I + γ1 X ⊤ X)−1 X ⊤ γφ(Lv ) + XX ⊤
+XX
+=
+−
+γ
+γ2
+v
++ φ(L ).
+
+ (10)
+The complexity is reduced from O n3 to O n2 f when
+n > f . It can be seen from Eq. 10 that the filter is essentially
+a feature-based modification to the conventional filter, which
+is solely based on graph structure. Different from existing
+works (Pan and Kang 2021; Lin and Kang 2021), the filters
+are not independent for each graph but correlated by feature,
+thus they can capture the correlations between views to some
+extent.
+
+i=1 j̸=i
+
+where (2.a): Miiv1 ,v2 is the cosine similarity of Z:iv1 and Z:iv2 ,
+v ,v
+
+so Mii1 2 ∈ [−1, 1]. If H is positive semi-definite, we have
+Miiv1 ,v2 = Λv11Λv2 W:i⊤ H v1 ,v2 W:i ≥ 0, i.e., Miiv1 ,v2 ∈ [0, 1].
+ii
+ii
+Therefore, the first term is bounded by d.
+The positive semi-definite property in the Proposition. 2
+prevents BT from having the lower bound in Proposition.
+1. More importantly, this upper bound constrains BT loss
+to a small range. Consequently, to improve the performance
+of BT in real applications, we design a filter that ensures
+H v1 ,v2 be positive semi-definite. A simple way is to let
+(g(Lv1 )X)⊤ g(Lv2 )X ≈ X ⊤ X, which is positive semidefinite due to the nature of the inner product of matrices.
+For notation simplicity, we use K ∈ Rn×n to represent the
+filter g(·). The filter can be approximately obtained by solving the following problem:
+2
+
+min ∥X − KX∥F ,
+K
+
+(6)
+
+where ∥ · ∥F denotes the Frobenius norm. Eq. 6 could produce a trivial solution and it neglects the rich topology information in graphs. Hence, we design a regularizer to preserve
+the most important low-frequency information. Considering
+the variation in each graph, we learn a filter for each view.
+2
+
+min
+∥X − K v X∥F + γ∥K v − φ(Lv )∥2F ,
+v
+K
+
+(7)
+
+where γ > 0 is trade-off parameter and φ(Lv ) is a typical
+low-pass filter (Zhang et al. 2019):
+Lv k
+φ(L ) = (I −
+) ,
+2
+v
+
+(8)
+
+where k is the filter order. Eq. 7 can be easily solved by setting its first-order derivative w.r.t. K v to zero, which yields,
+−1
+
+K v = XX ⊤ + γI
+γφ(Lv ) + XX ⊤ .
+(9)
+
+However, the O n3 computational complexity of the inverse operation is expensive. This problem can be alleviated by using the Woodbury matrix identity (Higham 2002).
+
+Multi-relational Graph Clustering
+The multi-relational graph is first processed by the filter to
+ev:
+obtain X
+e v = K v X.
+X
+(11)
+e v integrate view-specific topology
+The smoothed features X
+e into a network that
+with the node attributes. We then feed X
+consists of linear layers. Specifically, the encoder and decoder for each view share the same parameters, so the entire
+network can be considered as one auto-encoder.
+e v into feature subspace to obtain
+The encoder maps X
+v
+embedding Z . The embeddings from different views are
+paired to compute Barlow Twins, and the resulting values
+are averaged. We denote the result as a feature decorrelation
+loss:
+V
+V
+1 X X v1 ,v2
+LF D = V 
+(12)
+LBT .
+2
+
+v1 ̸=v2 v2 =1
+
+We use target distribution and soft cluster assignment
+probabilities distribution to enhance clustering quality (Tu
+et al. 2021). All embeddings are concatenated into Z =
+[Z 1 , Z 2 , ..., Z V ] ∈ Rn×V d as the input to this selfsupervised clustering module. The soft assignment distribution Q can be formulated as:
+
+−1
+2
+1 + ∥zi − σj ∥
+qij = P 
+(13)
+−1 ,
+2
+′∥
+1
++
+∥z
+−
+σ
+′
+i
+j
+j
+where qij is measured by Student’s t-distribution to indicate
+the similarity between node i’s embedding zi and clustering center σj that is initialized by the centers resulting from
+the k-means implemented on Z. The target distribution P is
+computed as:
+P
+2
+qij
+/ i qij
+.
+(14)
+pij = P 
+P
+2 /
+′
+q
+q
+′
+′
+ij
+ij
+j
+i
+We then minimize the KL divergence between the Q and
+P distributions to encourage the data representation to align
+
+with cluster centers and enhance cluster cohesion (Kullback
+and Leibler 1951):
+XX
+piu
+LCLU = KL(P ∥Q) =
+piu log
+.
+(15)
+qiu
+u
+i
+Afterward, the decoder is utilized to obtain reconstructed
+features:
+X̄ v = Z v Wde ,
+(16)
+d×f
+where Wde ∈ R
+. It is worth noting that the features of
+certain “easy samples” only exhibit tiny changes during reconstruction, suggesting that these nodes provide little informative input for our network. The Scaled Cosine Error
+(SCE) (Hou et al. 2022) is adopted as the reconstruction objective function in our model for down-weighting the contribution of those easy samples:
+!2
+n
+X
+e v )⊤ X̄ v
+(X
+i
+i
+v
+LSCE =
+1−
+(17)
+e v ∥ · ∥X̄ v ∥
+∥X
+i
+
+i
+
+i=1
+
+Same as Barlow Twins, LSCE needs to be summed and averaged:
+V
+1 X v
+LM SCE =
+L
+.
+(18)
+V v=1 SCE
+By combining LF D , LM SCE , and LCLU , the overall objective function of BTGF can be computed as:
+L = LM SCE + LF D + LCLU .
+
+(19)
+
+We minimize the above objective function to optimize our
+auto-encoder and achieve the cluster label yi for node i by:
+yi = argmax qij .
+
+(20)
+
+j
+
+Experiment
+Table 1: The statistics of datasets.
+Datasets
+
+Nodes
+
+Relation Types
+
+Edges
+
+Attributes
+
+Classes
+
+ACM
+
+3,025
+
+Paper-Author-Paper
+Paper-Subject-Paper
+
+29,281
+2,210,761
+
+1, 830
+
+3
+
+AMiner
+
+6,564
+
+Paper-Author-Paper
+Paper-Reference-Paper
+
+15,412
+123,260
+
+6,564
+
+4
+
+DBLP
+
+7, 907
+
+Paper-Paper-Paper
+Paper-Author-paper
+
+90,145
+144,783
+
+2, 000
+
+4
+
+Amazon
+
+7, 621
+
+Item-AlsoView-Item
+Item-AlsoBought-Item
+Item-BoughtTogether-Item
+
+266,237
+1,104,257
+16,305
+
+2, 000
+
+4
+
+Datasets and Metrics
+To show the effectiveness of BTGF, we evaluate our method
+on four multi-relational graphs. ACM and DBLP (Fan
+et al. 2020) are citation graph networks. Amazon (He and
+McAuley 2016) is a review graph network. AMiner (Wang
+et al. 2021a) is an academic graph network. The statistical
+information of them is summarized in Table 1. We adopt
+four popular clustering metrics, including ACCuracy (ACC),
+Normalized Mutual Information (NMI), F1 score, and Adjusted Rand Index (ARI). A higher value of them indicates a
+better performance.
+
+Experimental Setup
+Parameter Setting The experiments are implemented in
+the PyTorch platform using an Intel(R) Core(TM) i9-12900k
+CPU, and GeForce GTX 3090 24G GPU. Our auto-encoder
+is trained by Adam optimizer (Kingma and Ba 2015) for 400
+epochs. For simplicity, both our encoder and decoder only
+have one linear layer, denoted as W ∈ Rf ×d , Wde ∈ Rd×f
+respectively, where d = 10. The learning rate and weight decay of the optimizer are set to 1e−2 and 1e−3 , respectively.
+The filter’s parameters k and γ is tuned in [1, 2, 3, 4, 5] and
+[0.1, 1, 10, 100, 1000], respectively.
+Comparison Methods We compare BTGF with multiview methods: HAN (Wang et al. 2019) and HDMI (Jing,
+Park, and Tong 2021), which use the attention mechanism;
+O2MAC (Fan et al. 2020) clusters multi-relational data by
+selecting an informative graph. We also compare BTGF with
+contrastive learning methods, such as MCGC (Pan and Kang
+2021) and MGCCN (Liu et al. 2022a). MvAGC (Lin and
+Kang 2021) and MGDCR (Mo et al. 2023) are also compared. Particularly, MvAGC and MCGC both employ graph
+filters to preprocess the attribute. MGDCR utilizes Barlow
+Twins as an objective function for multi-relational clustering. For an unbiased comparison, we copy part of the results
+from MCGC.
+
+Clustering Results
+The clustering results are reported in Table 2. From it, we
+have the following observations:
+• The advantages of BTGF are clear when compared
+to deep multi-view clustering methods: HAN, HDMI,
+O2MAC, and MGCCN. With respect to the most recent
+MGCCN, our method improves ACC, F1, NMI, ARI by
+11%, 16%, 45%, 34% on average, respectively. Note that
+MGCCN uses a contrastive learning mechanism to fuse
+representations of different views. As shown in Fig. 1,
+our superiority stems from the incorporation of Barlow
+Twins, which significantly enhances the integration of information from different graphs.
+• In comparison to shallow MvAGC and MCGC methods, our approach greatly boosts clustering performance.
+Both MvAGC and MCGC employ a low-pass filter on
+each graph to smooth the attributes, which fails to consider the correlation between different views. This is exactly the issue that BTGF aims to tackle.
+• BTGF outperforms Barlow Twins-based method
+MGDCR. In particular, the improvement on Amazon
+and AMiner is significant. This could be caused by
+the large number of hyperparameters introduced in
+computing the pairwise loss in MGDCR, which are hard
+to find the most appropriate values.
+In summary, BTGF consistently outperforms all compared
+methods in terms of four metrics over all datasets. The stable results obtained with such a simple network demonstrate
+the validity of our filter and the clustering architecture. They
+could be further improved if a more complex auto-encoder
+architecture with deep artifices such as activation functions
+or dropout is applied.
+
+Table 2: Node clustering results.
+Dataset
+
+ACM
+
+DBLP
+
+Amazon
+
+AMiner
+
+Metric
+
+ACC
+
+F1
+
+NMI
+
+ARI
+
+ACC
+
+F1
+
+NMI
+
+ARI
+
+ACC
+
+F1
+
+NMI
+
+ARI
+
+ACC
+
+F1
+
+NMI
+
+ARI
+
+HAN(2019)
+O2MAC(2020)
+MvAGC(2021)
+HDMI(2021)
+MCGC(2021)
+MGCCN(2022)
+MGDCR(2023)
+
+0.8823
+0.9042
+0.8975
+0.8740
+0.9147
+0.9167
+0.9190
+
+0.8844
+0.9053
+0.8986
+0.8720
+0.9155
+0.8472
+0.8678
+
+0.5881
+0.6923
+0.6735
+0.6450
+0.7126
+0.7095
+0.7210
+
+0.5933
+0.7394
+0.7212
+0.6740
+0.7627
+0.7688
+0.6496
+
+0.7651
+0.7267
+0.7221
+0.8010
+0.7850
+0.8301
+0.8070
+
+0.6309
+0.7320
+0.7332
+0.7898
+0.7359
+0.7336
+0.8048
+
+0.4866
+0.4066
+0.4191
+0.5820
+0.5510
+0.6156
+0.6140
+
+0.4635
+0.4036
+0.4049
+0.5356
+0.4439
+0.5876
+0.5259
+
+0.4355
+0.4428
+0.5188
+0.5251
+0.4683
+0.5309
+0.3489
+
+0.4246
+0.4424
+0.5072
+0.5448
+0.4804
+0.4572
+0.2039
+
+0.1120
+0.1344
+0.2322
+0.3702
+0.2149
+0.1931
+0.0318
+
+0.0362
+0.0898
+0.1141
+0.2735
+0.1056
+0.1860
+0.0055
+
+0.7119
+0.4939
+0.5472
+0.4032
+0.4165
+0.6039
+0.5150
+
+0.5340
+0.3202
+0.1781
+0.3023
+0.3982
+0.5311
+0.2533
+
+0.2020
+0.0857
+0.0452
+0.1349
+0.2254
+0.2039
+0.0265
+
+0.1260
+0.0552
+0.0003
+0.0314
+0.1608
+0.2883
+0.0300
+
+BTGF
+
+0.9322
+
+0.9331
+
+0.758
+
+0.8085
+
+0.8309
+
+0.8384
+
+0.6242
+
+0.5969
+
+0.6603
+
+0.6612
+
+0.3853
+
+0.2829
+
+0.7308
+
+0.5408
+
+0.3603
+
+0.5233
+
+Table 3: Clustering performance of variants of BTGF.
+Datasets
+
+ACM
+
+DBLP
+
+Amazon
+
+AMiner
+
+Datasets
+
+ACM
+
+DBLP
+
+Amazon
+
+AMiner
+
+BTGF
+
+0.9322
+
+0.8309
+
+0.6603
+
+0.7308
+
+w/ mix-pass filter
+
+0.9250
+
+0.8148
+
+0.6462
+
+0.5716
+
+w/ low-pass filter
+
+0.9088
+
+0.8195
+
+0.6184
+
+0.7116
+
+w/o filter
+
+0.8707
+
+0.7166
+
+0.6004
+
+0.3326
+
+ACC
+
+BTGF
+w/o LF D
+w/o LM SCE
+
+0.9322
+0.9121
+0.9296
+
+0.8309
+0.8212
+0.8041
+
+0.6603
+0.5885
+0.5149
+
+0.7308
+0.6817
+0.5506
+
+F1
+
+BTGF
+w/o LF D
+w/o LM SCE
+
+0.9331
+0.9130
+0.9305
+
+0.8384
+0.8273
+0.8080
+
+0.6612
+0.5272
+0.4564
+
+0.5308
+0.4688
+0.3209
+
+NMI
+
+BTGF
+w/o LF D
+w/o LM SCE
+
+0.758
+0.6988
+0.7525
+
+0.6242
+0.5900
+0.5760
+
+0.3853
+0.3695
+0.2223
+
+0.3603
+0.3540
+0.0612
+
+ARI
+
+BTGF
+w/o LF D
+w/o LM SCE
+
+0.8085
+0.7553
+0.8019
+
+0.5969
+0.5788
+0.5501
+
+0.2829
+0.2590
+0.1640
+
+0.5233
+0.5017
+0.1054
+
+Ablation Study
+The Effect of Different Loss Terms To validate the effectiveness of different components in our model, we compare
+the performance of BTGF with its two variants:
+• Employing BTGF without LF D to show the importance
+of utilizing feature decorrelation.
+• Employing BTGF without LM SCE to observe the impact
+of the decoder and feature reconstruction. It means training an encoder with LF D + LCLU and no decoder.
+Based on Table 3, we can draw the following conclusions.
+Firstly, the results of BTGF are better than all variants,
+which indicates the validity of each term. Second, the Barlow Twins plays a crucial role in fusing different views. Especially for Amazon with three relation types, the impact
+of the correlation regularizer LF D is huge. In addition, the
+feature reconstruction loss used to down-weight easy samples’ contribution is proved to be helpful in improving the
+clustering performance.
+The Effect of Graph Filter To illustrate the superiority
+of our filter, we plot the feature decorrelation loss LF D with
+respect to the training epochs and examine three variants of
+BTGF:
+•
+•
+
+Table 4: Clustering accuracy with different filters.
+
+with low-pass filter K = (I − L2 )2 instead of Eq. 10;
+with mix-pass filter K = (I − L2 )2 + ( L2 )2 instead of Eq.
+
+10;
+• without using graph filter as preprocessing.
+
+There are three findings:
+Obs 1: As shown in Fig. 3, our LF D loss has the
+smallest value. According to our Propositions, the positive
+semi-definite constraint on the feature can restrict the upper
+boundary of LF D and break through the lower boundary,
+reaching a lower value. The evolution of LF D is in line
+with our expectations. Note that the upper and lower bounds
+depend on the output of the encoder, exhibiting variation among different methods and datasets, and evolving
+throughout the training process. It is interesting to see that
+our upper bound is even smaller than the lower bound on
+Amazon, suggesting that we can find a better solution than
+an input with negative semi-definite inner product. This
+could explain our dramatic improvement on Amazon.
+Obs 2: As shown in Fig. 4, our LF D converges to smaller
+values compared to other filters. This indicates that our
+filter is more effective, which in turn improves the performance of downstream tasks. This is demonstrated in Table 4.
+Obs 3: The absence of filters produces the worst results, which validates the importance of fusing the topology
+structure and attribute information. Moreover, the low-pass
+and mix-pass filters generate inferior performance due to
+their neglect of the correlation between the multi-relational
+graphs.
+
+Parameter Analysis
+This section analyzes the sensitivity of parameters in BTGF
+across four datasets. There are only two parameters, k and
+γ, in the graph filter. Their influence on precision is demonstrated in Fig. 5. Overall, BTGF produces reasonable performance. On the one hand, a smaller value of γ prevents the
+filter from effectively utilizing the topological information
+
+(a) ACM
+
+(b) DBLP
+
+(c) Amazon
+
+(d) AMiner
+
+Figure 3: Verification of LF D surpassing the lower boundary as well as having an upper boundary.
+
+(a) ACM
+
+(b) DBLP
+
+(c) Amazon
+
+(d) AMiner
+
+Figure 4: The evolution of feature decorrelation loss LF D when using different filters.
+
+(a) ACM
+
+(b) DBLP
+
+(c) Amazon
+
+(d) AMiner
+
+Figure 5: The influence of k and γ on four datasets (metric: ACC).
+of multi-relational graphs, leading to impaired clusters. On
+the other hand, an excessively large γ could cause the filter to completely converge to a low-pass filter, which in turn
+neglects the constraint on the input. In addition, BTGF performs well for a small range of k, which is also convenient
+for practical application.
+
+Conclusion
+In this work, we find that the graph filter can impact the performance of Barlow Twins by analyzing the conditions for
+the existence of lower and upper bounds of Barlow Twins
+loss. We prove that an input with a positive semi-definite
+inner product yields an upper bound, which is potentially
+beneficial when applying Barlow Twins. Based on this finding, we design a novel graph filter that captures the correlations between multi-relational graphs. Afterward, a simple architecture, which incorporates multi-view correlation,
+
+feature decorrelation, and graph filtering, is developed for
+multi-relational clustering. Comprehensive experiments on
+four benchmark datasets demonstrate the effectiveness of
+our approach. The filter design guided by loss warrants further investigation in other scenarios, e.g., GNN.
+
+Acknowledgments
+This work was supported by the National Natural Science
+Foundation of China (Nos. 62276053 and 62376055).
+
+References
+Bielak, P.; Kajdanowicz, T.; and Chawla, N. V. 2022.
+Graph barlow twins: A self-supervised representation learning framework for graphs. Knowledge-Based Systems, 256:
+109631.
+Botev, Z.; Grotowski, J.; and Kroese, D. 2010. Kernel den-
+
+sity estimation via diffusion. Annals of Statistics, 38(5):
+2916–2957.
+Chen, T.; Kornblith, S.; Norouzi, M.; and Hinton, G. 2020.
+A simple framework for contrastive learning of visual representations. In International conference on machine learning,
+1597–1607. PMLR.
+Chen, X.; and He, K. 2021. Exploring simple siamese representation learning. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, 15750–
+15758.
+Cheng, J.; Wang, Q.; Tao, Z.; Xie, D.; and Gao, Q. 2021.
+Multi-view attribute graph convolution networks for clustering. In Proceedings of the twenty-ninth international conference on international joint conferences on artificial intelligence, 2973–2979.
+Fan, S.; Wang, X.; Shi, C.; Lu, E.; Lin, K.; and Wang, B.
+2020. One2multi graph autoencoder for multi-view graph
+clustering. In proceedings of the web conference 2020,
+3070–3076.
+Fang, R.; Wen, L.; Kang, Z.; and Liu, J. 2022. Structurepreserving graph representation learning. In 2022 IEEE International Conference on Data Mining (ICDM), 927–932.
+IEEE.
+Grill, J.-B.; Strub, F.; Altché, F.; Tallec, C.; Richemond,
+P.; Buchatskaya, E.; Doersch, C.; Avila Pires, B.; Guo, Z.;
+Gheshlaghi Azar, M.; et al. 2020. Bootstrap your own latenta new approach to self-supervised learning. Advances in
+neural information processing systems, 33: 21271–21284.
+He, K.; Fan, H.; Wu, Y.; Xie, S.; and Girshick, R. 2020.
+Momentum contrast for unsupervised visual representation
+learning. In Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, 9729–9738.
+He, R.; and McAuley, J. 2016. Ups and downs: Modeling
+the visual evolution of fashion trends with one-class collaborative filtering. In proceedings of the 25th international
+conference on world wide web, 507–517.
+Higham, N. J. 2002. Accuracy and stability of numerical
+algorithms. SIAM.
+Hou, Z.; Liu, X.; Cen, Y.; Dong, Y.; Yang, H.; Wang, C.; and
+Tang, J. 2022. Graphmae: Self-supervised masked graph autoencoders. In Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining, 594–
+604.
+Jing, B.; Park, C.; and Tong, H. 2021. Hdmi: High-order
+deep multiplex infomax. In Proceedings of the Web Conference 2021, 2414–2424.
+Kingma, D. P.; and Ba, J. 2015. Adam: A Method for
+Stochastic Optimization. In Proceedings of the International
+Conference on Learning Representations (ICLR) 2015.
+Kullback, S.; and Leibler, R. A. 1951. On information and
+sufficiency. The annals of mathematical statistics, 22(1):
+79–86.
+Lin, Z.; and Kang, Z. 2021. Graph Filter-based Multi-view
+Attributed Graph Clustering. In IJCAI, 2723–2729.
+
+Lin, Z.; Kang, Z.; Zhang, L.; and Tian, L. 2023. Multi-View
+Attributed Graph Clustering. IEEE Transactions on Knowledge & Data Engineering, 35(02): 1872–1880.
+Liu, L.; Kang, Z.; Ruan, J.; and He, X. 2022a. Multilayer
+Graph Contrastive Clustering Network. Inf. Sci., 613(C):
+256–267.
+Liu, Y.; Tu, W.; Zhou, S.; Liu, X.; Song, L.; Yang, X.; and
+Zhu, E. 2022b. Deep graph clustering via dual correlation
+reduction. In Proceedings of the AAAI Conference on Artificial Intelligence, volume 36, 7603–7611.
+Lyu, Q.; Fu, X.; Wang, W.; and Lu, S. 2022. Understanding latent correlation-based multiview learning and selfsupervision: An identifiability perspective. In International
+Conference on Learning Representations.
+Mo, Y.; Chen, Y.; Lei, Y.; Peng, L.; Shi, X.; Yuan, C.; and
+Zhu, X. 2023. Multiplex Graph Representation Learning Via
+Dual Correlation Reduction. IEEE Transactions on Knowledge and Data Engineering.
+Nie, F.; Li, J.; Li, X.; et al. 2017. Self-weighted Multiview
+Clustering with Multiple Graphs. In IJCAI, 2564–2570.
+Pan, E.; and Kang, Z. 2021. Multi-view contrastive graph
+clustering. Advances in neural information processing systems, 34: 2148–2159.
+Pan, E.; and Kang, Z. 2023a. Beyond Homophily: Reconstructing Structure for Graph-agnostic Clustering. In Proceedings of the 40th International Conference on Machine
+Learning, 26868–26877.
+Pan, E.; and Kang, Z. 2023b. High-order multi-view clustering for generic data. Information Fusion, 100: 101947.
+Qu, M.; Tang, J.; Shang, J.; Ren, X.; Zhang, M.; and Han,
+J. 2017. An attention-based collaboration framework for
+multi-view network representation learning. In Proceedings
+of the 2017 ACM on Conference on Information and Knowledge Management, 1767–1776.
+Tu, W.; Zhou, S.; Liu, X.; Guo, X.; Cai, Z.; Zhu, E.; and
+Cheng, J. 2021. Deep fusion clustering network. In Proceedings of the AAAI Conference on Artificial Intelligence,
+volume 35, 9978–9987.
+Wang, X.; Ji, H.; Shi, C.; Wang, B.; Ye, Y.; Cui, P.; and Yu,
+P. S. 2019. Heterogeneous Graph Attention Network. In The
+World Wide Web Conference, WWW ’19, 2022–2032.
+Wang, X.; Liu, N.; Han, H.; and Shi, C. 2021a. Selfsupervised heterogeneous graph neural network with cocontrastive learning. In Proceedings of the 27th ACM
+SIGKDD conference on knowledge discovery & data mining, 1726–1736.
+Wang, Y.; Chang, D.; Fu, Z.; and Zhao, Y. 2021b. Consistent
+multiple graph embedding for multi-view clustering. IEEE
+Transactions on Multimedia.
+Xia, W.; Wang, S.; Yang, M.; Gao, Q.; Han, J.; and Gao,
+X. 2022. Multi-view graph embedding clustering network:
+Joint self-supervision and block diagonal representation.
+Neural Networks, 145: 1–9.
+Zbontar, J.; Jing, L.; Misra, I.; LeCun, Y.; and Deny, S. 2021.
+Barlow twins: Self-supervised learning via redundancy reduction. In International Conference on Machine Learning,
+12310–12320. PMLR.
+
+Zhang, S.; Qiu, L.; Zhu, F.; Yan, J.; Zhang, H.; Zhao, R.; Li,
+H.; and Yang, X. 2022. Align representations with base: A
+new approach to self-supervised learning. In Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 16600–16609.
+Zhang, S.; Zhu, F.; Yan, J.; Zhao, R.; and Yang, X. 2021.
+Zero-cl: Instance and feature decorrelation for negative-free
+symmetric contrastive learning. In International Conference
+on Learning Representations.
+Zhang, X.; Liu, H.; Li, Q.; and Wu, X. M. 2019. Attributed
+graph clustering via adaptive graph convolution. In 28th International Joint Conference on Artificial Intelligence, IJCAI 2019.
+
+
