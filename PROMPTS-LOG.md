@@ -34,3 +34,11 @@
 ## 2025-12-13 14:41 - Delete Corrupted Directories
 
 > and then having done that delete those files and their directories
+
+## 2025-12-13 14:43 - Cleanup and Guidelines
+
+> are bing htmls being used by any other file?
+> 
+> if not delete
+> 
+> make a GUIDELINE that subdirs of multiple files with the same filename should be within their own directories with identical filename and extension '.d' and apply to string-drafts
