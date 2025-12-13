@@ -1,0 +1,10 @@
+\contentsline {section}{\numberline {1}Tier 0: Linear-Algebra Primitives}{2}{section.1}%
+\contentsline {section}{\numberline {2}Tier 1: Structured Generators}{4}{section.2}%
+\contentsline {section}{\numberline {3}Tier 2: Joint Block Structure}{5}{section.3}%
+\contentsline {section}{\numberline {4}Tier 3: Cayley Post-Rotations}{6}{section.4}%
+\contentsline {section}{\numberline {5}Tier 4: Attention Queries, Keys, and Scores}{6}{section.5}%
+\contentsline {section}{\numberline {6}Tier 5: Stability Estimates}{7}{section.6}%
+\contentsline {section}{\numberline {7}Tier 6: Conclusions}{8}{section.7}%
+\contentsline {section}{\numberline {8}Tier 6$^\prime $: Quantified Robustness}{8}{section.8}%
+\contentsline {section}{\numberline {9}Tier 7: Positive Random Features and Variance Bounds}{10}{section.9}%
+\contentsline {section}{\numberline {10}Tier 8$^\prime $: Tight Assumptions and OOD Dominance}{13}{section.10}%

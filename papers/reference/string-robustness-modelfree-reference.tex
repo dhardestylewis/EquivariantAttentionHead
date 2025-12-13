@@ -1,0 +1,260 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\opnorm}[1]{\left\lVert #1 \right\rVert}
+
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{theorem}{Theorem}
+
+\title{Quantified Robustness for Structured Rotary Attention}
+\author{Internal note extending RoFormer and STRING analyses}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+RoFormer~\cite{su2021roformer} and STRING~\cite{choromanski2023string} show that commuting skew generators give rise
+to relative attention logits when paired with structured post-rotations.
+This note isolates the genuinely novel contribution of our work:
+explicit robustness guarantees when the commutator and post-rotation assumptions are only
+approximately satisfied.
+We keep the notation of the original analyses and prove quantitative bounds for the BCH series,
+structured rotations, Cayley post-rotations, and, finally, the attention logits.
+\end{abstract}
+
+\section{Setup and baseline results}
+
+We adopt the shared notation used by RoFormer and STRING.
+Let $\{L_k\}_{k=1}^{d_c} \subset \mathfrak{so}(d_h)$ be skew-symmetric
+generators that commute pairwise in the idealized model.
+For a displacement $r \in \Real^{d_c}$ define
+\begin{equation}
+  A(r) \coloneqq \sum_{k=1}^{d_c} r_k L_k,
+  \qquad
+  R_{\mathrm{STR}}(r) \coloneqq \exp\big(A(r)\big) \in SO(d_h).
+\end{equation}
+The joint-block structure~\cite{choromanski2023string} provides an orthogonal matrix $U$ that block-diagonalizes the generators
+and exposes an active subspace of dimension $d_{\mathrm{act}} = 2m$.
+The corresponding projector is denoted by $\Pi_{\mathrm{act}} = U \begin{bmatrix} I_{2m} & 0 \\ 0 & 0 \end{bmatrix} U^\top$
+and $\Pi_{\mathrm{null}} = I - \Pi_{\mathrm{act}}$.
+Following STRING, we allow for post-rotations $P_{\mathrm{sp}} \in SO(d_h)$ obtained from a Cayley transform
+\begin{equation}
+  P_{\mathrm{sp}} = (I - S)(I+S)^{-1},
+  \qquad S = S_- + E,
+\end{equation}
+where $S_-^\top = -S_-$ captures the exact skew component induced by the algebra and
+$E^\top = -E$ represents a small mixing perturbation.
+
+\begin{assumption}[Baseline relative property]
+In the unperturbed setting ($E=0$ and $[L_a,L_b]=0$) the active rotation obeys
+$R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s)= R_{\mathrm{STR}}(s-r)$ and
+$\Pi_{\mathrm{act}} P_{\mathrm{sp}} \Pi_{\mathrm{act}} = \Pi_{\mathrm{act}}$.
+\end{assumption}
+
+This captures the core theorems proved in RoFormer (Equations (11)--(13)) and the deterministic STRING analysis.
+The remainder of the note quantifies the deviation from this idealisation.
+
+\subsection*{Error parameters}
+
+We measure the size of the commutator defect by
+\begin{equation}
+  \varepsilon_{\mathrm{comm}} \coloneqq \max_{a,b} \norm{[L_a,L_b]}.
+\end{equation}
+The block structure induces weights $\lambda_{k,u}$ so that $A(r)$ becomes block-diagonal in the active planes.
+Define the structural constant
+\begin{equation}
+  \Lambda \coloneqq \max_{u \in \{1,\dots,m\}} \sum_{k=1}^{d_c} \abs{\lambda_{k,u}},
+  \qquad R \coloneqq \max_i \norm{r_i}_1.
+\end{equation}
+For the Cayley map we set $\rho \coloneqq \norm{S}$ and $\eta \coloneqq \norm{E}$,
+assuming $\rho < 1$ so that $(I+S)$ is invertible.
+When the post-rotation is supplied externally (``model-free'' case) we instead work with
+\begin{equation}
+  \eta_{\mathrm{mix}} \coloneqq
+  \max\left\{ \norm{\Pi_{\mathrm{null}} P_{\mathrm{sp}} \Pi_{\mathrm{act}}},\;
+              \norm{\Pi_{\mathrm{act}} P_{\mathrm{sp}} \Pi_{\mathrm{null}}} \right\}.
+\end{equation}
+
+\section{Quantitative BCH control}
+
+The first technical ingredient bounds the size of the generator and provides an explicit
+constant for the Baker--Campbell--Hausdorff (BCH) remainder.  This portion recapitulates
+the deterministic algebra from STRING but makes the constants explicit for later use.
+
+\begin{lemma}[Generator norm]\label{lem:generator-norm}
+For every displacement $r \in \Real^{d_c}$ we have
+$\norm{A(r)} \le \Lambda \norm{r}_1$.
+Define $C_{\mathrm{BCH}}(r,s) \coloneqq C_\star \exp\big( 2\Lambda(\norm{r}_1 + \norm{s}_1) \big)$
+for an absolute $C_\star$ that bounds higher-order BCH coefficients.
+\end{lemma}
+
+\begin{lemma}[Quantitative BCH]\label{lem:bch}
+Let $r,s \in \Real^{d_c}$. Then
+\begin{equation}
+  \left\lVert
+    \log\!\big(\exp A(r)\,\exp A(s)\big) - \big(A(r)+A(s)\big)
+  \right\rVert
+  \le \tfrac12 \varepsilon_{\mathrm{comm}} \norm{r}_1 \norm{s}_1
+     + C_{\mathrm{BCH}}(r,s) \varepsilon_{\mathrm{comm}}^2 \norm{r}_1^2 \norm{s}_1^2.
+\end{equation}
+\end{lemma}
+
+\begin{proposition}[Structured rotation stability]\label{prop:relative-rotation}
+With the same hypotheses we obtain
+\begin{equation}
+  \norm{ R_{\mathrm{STR}}(r)^\top R_{\mathrm{STR}}(s) - R_{\mathrm{STR}}(s-r) }
+  \le
+  C_1 \varepsilon_{\mathrm{comm}} \norm{r}_1 \norm{s}_1
+  + C_2 \varepsilon_{\mathrm{comm}}^2 \norm{r}_1^2 \norm{s}_1^2,
+\end{equation}
+where $C_1,C_2$ are universal (arising from the
+matrix exponential Lipschitz bound applied to Lemma~\ref{lem:bch}).
+\end{proposition}
+
+\section{Cayley post-rotations under perturbations}
+
+We now deviate from the exact STRING setup and allow $S$ to acquire an additive perturbation $E$.
+All statements below are new: neither RoFormer nor STRING provide quantitative stability estimates in this regime.
+
+\begin{lemma}[Cayley Lipschitzness]\label{lem:cayley-lip}
+If $\norm{S} \le \rho < 1$ and $\norm{E} = \eta$, then
+\begin{equation}
+  \norm{P_{\mathrm{sp}}(S) - P_{\mathrm{sp}}(S_-)}
+  \le \frac{2}{(1-\rho)^2}\,\eta.
+\end{equation}
+\end{lemma}
+
+\begin{lemma}[Quadratic active mixing]\label{lem:quadratic-mix}
+Let $\Pi_{\mathrm{act}} S \Pi_{\mathrm{act}} = 0$ and $\Pi_{\mathrm{null}} S \Pi_{\mathrm{null}} = S_{\mathrm{null}}$,
+as in the STRING block-structured Cayley factorisation.  Then
+\begin{equation}
+  \norm{ \Pi_{\mathrm{act}} P_{\mathrm{sp}}(S) \Pi_{\mathrm{act}} - \Pi_{\mathrm{act}} }
+  \le \frac{2}{(1-\rho)^3}\,\eta^2.
+\end{equation}
+\end{lemma}
+
+\begin{lemma}[Model-free bound]\label{lem:model-free}
+For an arbitrary $P_{\mathrm{sp}} \in SO(d_h)$ written in the STRING basis as
+$U \begin{bmatrix} A & B \\ C & D \end{bmatrix} U^\top$ we have
+\begin{equation}
+  \norm{ \Pi_{\mathrm{act}} P_{\mathrm{sp}} \Pi_{\mathrm{act}} - \Pi_{\mathrm{act}} }
+  \le 2\,\eta_{\mathrm{mix}}.
+\end{equation}
+\end{lemma}
+
+Combining Lemmas~\ref{lem:quadratic-mix} and \ref{lem:model-free} yields a unified parameter
+\begin{equation}
+  \delta_{\mathrm{mix}} \coloneqq
+  \begin{cases}
+    \dfrac{2}{(1-\rho)^3}\,\eta^2, & \text{structured Cayley / ESPR case}, \\[6pt]
+    2\,\eta_{\mathrm{mix}}, & \text{model-free case}.
+  \end{cases}
+\end{equation}
+
+\begin{corollary}[Active block approximation]\label{cor:active-block}
+For every displacement $r$,
+\begin{equation}
+  \norm{ \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r) \Pi_{\mathrm{act}}
+        - \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r) \Pi_{\mathrm{act}} }
+  \le \delta_{\mathrm{mix}},
+  \qquad R_{\mathrm{sp}}(r) \coloneqq R_{\mathrm{STR}}(r) P_{\mathrm{sp}}.
+\end{equation}
+\end{corollary}
+
+\section{Robust relative logits}
+
+Let $q_i = W_Q x_i$ and $k_j = W_K x_j$ denote the query and key projections used in RoFormer/STRING,
+and set $q_i^{(\mathrm{act})} = \Pi_{\mathrm{act}} q_i$,
+$k_j^{(\mathrm{act})} = \Pi_{\mathrm{act}} k_j$.
+Define rotated vectors $\tilde q_i = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_i) q_i^{(\mathrm{act})}$ and
+$\tilde k_j = \Pi_{\mathrm{act}} R_{\mathrm{sp}}(r_j) k_j^{(\mathrm{act})}$.
+The attention logit at head dimension $d_{\mathrm{act}} = 2m$ is
+\begin{equation}
+  \alpha_{ij} = \frac{1}{\sqrt{2m}}\, \tilde q_i^\top \tilde k_j.
+\end{equation}
+Let
+\begin{equation}
+  \alpha_{ij}^\star \coloneqq \frac{1}{\sqrt{2m}}
+    \big(q_i^{(\mathrm{act})}\big)^\top
+    \big( \Pi_{\mathrm{act}} R_{\mathrm{STR}}(r_j - r_i) \Pi_{\mathrm{act}} \big)
+    k_j^{(\mathrm{act})},
+\end{equation}
+the ideal relative logit from the original proofs.
+
+\begin{lemma}[Logit perturbation]\label{lem:logit-pert}
+For all $(i,j)$,
+\begin{align}
+  \abs{\alpha_{ij} - \alpha_{ij}^\star}
+  &\le
+    \norm{q_i^{(\mathrm{act})}} \norm{k_j^{(\mathrm{act})}}
+    \Big(
+      C_1 \varepsilon_{\mathrm{comm}} \norm{r_i}_1 \norm{r_j}_1
+      + C_2 \varepsilon_{\mathrm{comm}}^2 \norm{r_i}_1^2 \norm{r_j}_1^2
+      + \delta_{\mathrm{mix}}
+    \Big).
+\end{align}
+\end{lemma}
+
+\begin{theorem}[Quantified robust relative logits]\label{thm:robust-logits}
+Let $C_{\mathrm{mix}} = 1$ and $\delta_{\mathrm{mix}} = \eta_{\mathrm{mix}}$ in the model-free case, and
+$C_{\mathrm{mix}} = \frac{2}{(1-\rho)^3}$ together with $\delta_{\mathrm{mix}} = \eta^2$ in the structured Cayley case.
+Then
+\begin{align}
+  \abs{\alpha_{ij} - \alpha_{ij}^\star}
+  &\le
+    \Big(\tfrac12 + C_{\mathrm{BCH}}(r_i,r_j)\Big)
+    \varepsilon_{\mathrm{comm}} \norm{r_i}_1 \norm{r_j}_1
+    \norm{q_i^{(\mathrm{act})}} \norm{k_j^{(\mathrm{act})}} \nonumber\\
+  &\quad +
+    C_{\mathrm{mix}}\,\delta_{\mathrm{mix}}\,\norm{q_i^{(\mathrm{act})}} \norm{k_j^{(\mathrm{act})}}.
+\end{align}
+\end{theorem}
+
+\begin{proof}
+Combine Lemma~\ref{lem:logit-pert} with Proposition~\ref{prop:relative-rotation}
+and Corollary~\ref{cor:active-block}.
+\end{proof}
+
+\section{Discussion: overlap versus novelty}
+
+\begin{itemize}
+  \item Definitions of $A(r)$, $R_{\mathrm{STR}}$, and the use of joint block diagonalisation mirror
+        the core statements of RoFormer and STRING; they are reintroduced here solely to fix notation.
+  \item Lemma~\ref{lem:generator-norm} matches the deterministic bounds implicit in STRING,
+        but we expose explicit constants needed for downstream stability.
+  \item Lemmas~\ref{lem:cayley-lip}--\ref{lem:model-free}, Corollary~\ref{cor:active-block}, Lemma~\ref{lem:logit-pert},
+        and Theorem~\ref{thm:robust-logits} are new: neither RoFormer nor STRING quantify
+        how attention logits behave when generators only approximately commute
+        and when the Cayley post-rotation leaks outside the active subspace.
+\end{itemize}
+
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+\bibitem{su2021roformer}
+Jianlin Su, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu.
+\newblock RoFormer: Enhanced transformer with rotary position embedding.
+\newblock \emph{arXiv preprint arXiv:2104.09864}, 2021.
+
+\bibitem{choromanski2023string}
+Krzysztof Choromanski and Daniel Hardesty Lewis.
+\newblock STRING: Generalization of RoPE.
+\newblock Internal manuscript, 2023.
+
+\end{thebibliography}
+
+\end{document}

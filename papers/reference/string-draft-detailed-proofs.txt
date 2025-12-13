@@ -1,0 +1,1766 @@
+Equivariant Structured Positional Rotations:
+Complete Algebraic Derivation
+
+Abstract
+This document provides a complete, boxed derivation of the relative-position property for
+equivariant structured positional rotations in attention mechanisms. Each step is recorded
+as a labelled statement [T ·] with explicit dependencies so that the argument can be followed
+mechanically.
+
+Contents
+1 Tier 0: Linear-Algebra Primitives
+
+2
+
+2 Tier 1: Structured Generators
+
+4
+
+3 Tier 2: Joint Block Structure
+
+5
+
+4 Tier 3: Cayley Post-Rotations
+
+6
+
+5 Tier 4: Attention Queries, Keys, and Scores
+
+6
+
+6 Tier 5: Stability Estimates
+
+7
+
+7 Tier 6: Conclusions
+
+8
+
+8 Tier 6′ : Quantified Robustness
+
+8
+
+9 Tier 7: Positive Random Features and Variance Bounds
+
+10
+
+10 Tier 8′ : Tight Assumptions and OOD Dominance
+
+13
+
+1
+
+1
+
+Tier 0: Linear-Algebra Primitives
+∅
+
+N = {1, 2, 3, . . . }
+
+[T 0.1 : N, Idx]
+
+[deps : ∅]
+
+dh , dc , D ∈ N
+∅
+
+∅
+
+∅
+
+H = {1, . . . , dh },
+
+JD = {1, . . . , D}
+
+K = {1, . . . , dc },
+(
+1, i = j,
+∅
+[T 0.2 : In , δij ] δij =
+0, i ̸= j,
+
+[deps : T 0.1]
+
+In = [δij ]ni,j=1
+∅
+
+[T 0.3 : Rm×n , (·)⊤ , (·)∗ , tr]
+
+Rm×n = set of m × n real matrices
+∅
+
+[deps : T 0.1]
+
+Cm×n = set of m × n complex matrices
+∅
+
+A⊤ ∈ Rn×m
+
+(A ∈ Rm×n )
+
+⊤
+
+(B ∈ Cm×n )
+
+B∗ = B
+n
+X
+∅
+tr(M ) =
+Mii
+∅
+
+(M ∈ Cn×n )
+
+i=1
+
+det : Cn×n → C
+
+[T 0.4 : det]
+
+[deps : T 0.3]
+
+det(AB) = det(A) det(B)
+det(A⊤ ) = det(A)
+U invertible ⇒ det(U AU −1 ) = det(A)
+(multiplicativity, transpose invariance, similarity invariance)
+m
+M
+
+[T 0.5 : ⊕, blk, det ⊕]
+
+∅
+
+Mu = diag(M1 , . . . , Mm )
+
+u=1
+
+det
+
+m
+M
+
+!
+Mu
+
+u=1
+
+=
+
+m
+Y
+
+det(Mu )
+
+u=1
+
+(block triangular matrices have determinant equal to product of block determinants)
+[T 0.6 : O, SO, U ]
+
+O(n) = {Q ∈ Rn×n | Q⊤ Q = In }
+∅
+
+[deps : T 0.2, T 0.3, T 0.4]
+
+∅
+
+SO(n) = {Q ∈ O(n) | det Q = 1}
+U (n) = {W ∈ Cn×n | W ∗ W = In }
+∅
+
+Q ∈ O(n) ⇒ Q−1 = Q⊤
+[T 0.7 : det O] Q ∈ O(n) ⇒ (det Q)2 = det(Q⊤ Q) = det(In ) = 1
+⇒ det Q ∈ {±1}
+
+2
+
+[deps : T 0.6, T 0.4]
+
+[d
+
+∅
+
+σ(M ) = {λ ∈ C | ∃x ̸= 0 : M x = λx}
+
+[T 0.8 : σ, σmin , normal]
+
+∗
+
+[deps : T 0.3]
+
+∗
+
+M M = M M ⇒ M normal
+∅ p
+Singular values si (M ) = σi (M ∗ M )
+∅
+
+σmin (M ) = min si (M )
+i
+
+M normal ⇒ si (M ) = |λi | for λi ∈ σ(M )
+(unitary diagonalisation of normal matrices)
+!1/2
+X
+
+∅
+
+[T 0.9 : | · |, | · |1 ]
+
+|x| =
+
+x2u
+
+(x ∈ Rm )
+
+[deps : T 0.8]
+
+u
+∅
+
+|x|1 =
+
+X
+
+|xu |
+
+u
+
+|M v|
+v̸=0 |v|
+
+|M | = sup
+
+(M ∈ Rm×n )
+
+|AB| ≤ |A| |B|,
+
+|A + B| ≤ |A| + |B|
+
+∅
+
+∅
+
+|a| = |a|
+
+(a ∈ R)
+
+(overloaded notation chooses scalar, vector, or operator norm from context)
+∅
+
+[T 0.10 : [A, B]] [A, B] = AB − BA
+
+[deps : T 0.3]
+
+∅
+
+[T 0.11 : exp, log, exp props]
+
+exp(M ) =
+
+X1
+t≥0
+
+t!
+
+Mt
+
+[deps : T 0.3, T 0.4, T 0.5, T
+
+log(X) locally defined as exp−1 (X) near In
+[A, B] = 0 ⇒ exp(A + B) = exp(A) exp(B)
+(exp M )⊤ = exp(M ⊤ )
+U invertible ⇒ exp(U M U −1 ) = U exp(M )U −1
+det(exp M ) = exp(tr M )
+!
+m
+m
+M
+M
+exp
+Mu =
+exp(Mu )
+u=1
+
+u=1
+
+(all properties follow from the power-series definition)
+[T 0.12 : C, O(·), ≈ε ] C = {C, C ′ , C ′′ , · · · | C ≥ 0 finite constants}
+∅
+
+[deps : T 0.9]
+
+f = O(g) ⇔ ∃C ∈ C : f ≤ Cg
+X ≈ε Y ⇔ |X − Y | ≤ ε
+
+[T 0.13 : BCH] exp(M ) exp(N ) = exp M + N + 12 [M, N ] + R(M, N )
+|R(M, N )| = O(|[M, N ]|2 )
+(Baker–Campbell–Hausdorff series (local version))
+3
+
+[deps : T 0.11, T 0.10, T 0.12, T 0.9]
+
+∅
+
+[T 0.14 : ker, im, rank] ker(M ) = {x | M x = 0}
+
+[deps : T 0.3, T 0.1]
+
+∅
+
+im(M ) = {M x | x}
+∅
+
+rank(M ) = dim(im(M ))
+P 2 = P and P ⊤ = P ⇒ P orthogonal projector
+
+[T 0.15 : proj]
+
+[deps : T 0.14, T 0.3]
+
+P, Q orthogonal projectors and P Q = 0 ⇒ im(P ) ⊥ im(Q)
+(characterisation via images)
+S ⊤ = −S ⇒ S normal
+
+[T 0.16 : skewspec ]
+
+[deps : T 0.3, T 0.8]
+
+σ(S) ⊂ iR
+λ = iµ ∈ σ(S) ⇒ −λ = −iµ ∈ σ(S)
+(skew-symmetric spectra occur in conjugate-sign pairs)
+
+
+0 −1
+,
+[T 0.17 : J, R2 ] J =
+1 0
+
+∅
+
+∅
+
+R2 (θ) = exp(θJ)
+
+[deps : T 0.11]
+
+R2 (θ)⊤ R2 (θ) = I2
+
+[T 0.18 : R2 ∈ SO(2)]
+
+[deps : T 0.17, T 0.16, T 0.11,
+
+det R2 (θ) = 1
+⇒ R2 (θ) ∈ SO(2)
+(uses J ⊤ = −J and properties of exp and the determinant)
+[T 0.19 : Weyl] σmin (A + E) − σmin (A) ≤ |E|
+
+[deps : T 0.8, T 0.9]
+
+[T 0.20 : (X −1 )⊤ ] X invertible ⇒ (X −1 )⊤ = (X ⊤ )−1
+
+2
+
+[deps : T 0.3]
+
+Tier 1: Structured Generators
+
+[T 1.1 : Lk ]
+
+∀k ∈ K : Lk ∈ Rdh ×dh ,
+
+L⊤
+k = −Lk ,
+
+[La , Lb ] = 0
+
+[deps : T 0.1, T 0.3, T 0.10, T 0.16]
+
+(model hypothesis: commuting skew-symmetric generators)
+[T 1.2 : normal Lk ] L⊤
+k = −Lk ⇒ Lk normal
+[T 1.3 : A(r)] r ∈ Rdc ⇒ A(r) =
+∅
+
+dc
+X
+
+rk Lk
+
+[deps : T 1.1, T 0.16]
+
+[deps : T 1.1, T 0.1]
+
+k=1
+
+[T 1.4 : A(r)⊤ ] A(r)⊤ = −A(r)
+
+[deps : T 1.3, T 1.1, T 0.3]
+
+[T 1.5 : [A(r), A(s)]] [A(r), A(s)] = 0
+∅
+
+[T 1.6 : RSTR ] RSTR (r) = exp(A(r))
+4
+
+[deps : T 1.3, T 1.1, T 0.10]
+[deps : T 1.3, T 0.11]
+
+3
+
+Tier 2: Joint Block Structure
+{Lk }k∈K commute and are normal
+
+[T 2.1 : sim-unitary]
+
+⇒ ∃Uc ∈ U (dh ) :
+
+[deps : T 1.2, T 1.1, T 0.6, T 0.16]
+
+Uc∗ Lk Uc = diag(iλk,1 , . . . , iλk,dh )
+λk,j ∈ R
+Fix j ∈ H : Uc∗ Lk Uc ej = iλk,j ej
+
+[T 2.2 : real 2D planes]
+
+[deps : T 2.1, T 0.17, T 0.16, T 0.3]
+
+⇒ Lk (ℜej ) = λk,j J(ℜej , ℑej )
+Lk (ℑej ) = λk,j J(ℜej , ℑej )
+⇒ span{ℜej , ℑej } is a real, 2-D, Lk -invariant plane
+[T 2.3 : JointBlockDiag]
+
+∃m, dnull ∈ N : 2m + dnull = dh
+!
+m
+M
+∃U ∈ O(dh ) : U ⊤ Lk U =
+λk,u J ⊕ 0dnull ×dnull
+
+[deps : T 2.2, T 0.6, T 0.16, T 0.5]
+
+u=1
+
+[T 2.4 : β, θ] βu = (λ1,u , . . . , λdc ,u )⊤ ∈ Rdc
+∅
+
+[deps : T 2.3, T 1.1, T 0.1]
+
+θu (r) = βu⊤ r ∈ R
+∅
+
+m
+M
+
+[T 2.5 : U ⊤ A(r)U ] U ⊤ A(r)U =
+
+!
+θu (r)J
+
+⊕ 0dnull ×dnull
+
+m
+M
+
+!
+
+[deps : T 1.3, T 2.3, T 2.4, T 0.17, T 0.5]
+
+u=1
+
+[T 2.6 : exp blk] exp U ⊤ A(r)U =
+
+
+R2 (θu (r))
+
+⊕ Idnull
+
+!
+
+#
+
+[deps : T 2.5, T 0.17, T 0.11, T 0.5]
+
+u=1
+
+"
+[T 2.7 : RSTR form] RSTR (r) = U
+
+m
+M
+
+R2 (θu (r))
+
+⊕ Idnull U ⊤
+
+[deps : T 1.6, T 2.6, T 0.11, T 2.3]
+
+u=1
+
+[T 2.8 : RSTR ∈ SO]
+
+RSTR (r) ∈ SO(dh )
+
+[deps : T 2.7, T
+
+(uses R2 (θ) ∈ SO(2), block determinant multiplicativity, and U ∈ O(dh ))
+[T 2.9 : rel RSTR ] RSTR (ri )⊤ RSTR (rj ) = RSTR (rj − ri )
+
+[T 2.10 : Πact , Πnull , dact ]
+
+[deps : T 1.4, T 1.5, T 1.6, T 0.11]
+
+Πact = U diag(I2m , 0) U ⊤
+∅
+
+[deps : T 2.3, T 0.15, T 0.2, T 0.14, T 0.6]
+
+Πnull = U diag(0, Idnull ) U ⊤
+∅
+
+2
+Π⊤
+act = Πact , Πact = Πact
+2
+Π⊤
+null = Πnull , Πnull = Πnull
+
+Πact Πnull = 0 ⇒ im(Πact ) ⊥ im(Πnull )
+∅
+
+dact = rank(Πact ) = 2m
+[T 2.11 : Πact comm] RSTR (r)Πact = Πact RSTR (r)
+5
+
+[deps : T 2.7, T 2.10, T 0.5, T 0.6]
+
+4
+
+Tier 3: Cayley Post-Rotations
+[T 3.1 : Cayley] S ∈ Rdh ×dh , S ⊤ = −S ⇒ (I + S) invertible
+
+[deps : T 0.16, T 0.3, T 0.2]
+
+Psp = (I − S)(I + S)−1
+∅
+
+(I − S)(I + S) = (I + S)(I − S) = I − S 2
+(uses σ(S) ⊂ iR so 1 + iµ ̸= 0)
+⊤
+Psp
+= ((I + S)−1 )⊤ (I − S)⊤ = I
+Y 1 − iµu
+=1
+det(Psp ) =
+1 + iµu
+u
+
+[T 3.2 : Psp ∈ SO, B]
+
+[deps : T 3.1, T 0.16, T 0.20, T 0.7, T 0.6, T 0.4
+
+B = {(I − S)(I + S)−1 | S ⊤ = −S} ⊆ SO(dh )
+∅
+
+Q ∈ SO(dh ), −1 ∈
+/ σ(Q) ⇒ SQ = (I − Q)(I + Q)−1
+∅
+
+[T 3.3 : Cayley surj]
+
+⊤
+SQ
+= −SQ ,
+
+−1
+
+(I − SQ )(I + SQ )
+
+[deps : T 0.16, T 0.20, T 0.
+
+=Q
+
+(Cayley transform bijection on SO(dh ) with no −1 eigenvalues)
+n
+o
+∅
+A = U diag(I2m , Rnull ) U ⊤ Rnull ∈ SO(dnull ) ⊆ SO(dh )
+
+[T 3.4 : A]
+
+[deps : T 2.3, T 0.6, T 0.7, T 0.5, T 0.4, T
+
+Rnull ∈ SO(dnull ), −1 ∈
+/ σ(Rnull ) ⇒ U diag(I2m , Rnull ) U ⊤ ∈ B
+
+∅
+
+[T 3.5 : Rsp ]
+
+Rsp (r) = RSTR (r)Psp
+
+[deps : T 2.8, T 3.2, T 0.6, T 0.4]
+
+RSTR (r) ∈ SO(dh ), Psp ∈ SO(dh ) ⇒ Rsp (r) ∈ SO(dh )
+
+[T 3.6 : Πact Rsp Πact ] Psp ∈ A ⇒ Πact Psp = Πact = Psp Πact
+
+[deps : T 3.5, T 2.10, T 2.11, T 3.4, T 0.5, T 0.6]
+
+RSTR (r)Πact = Πact RSTR (r)
+⇒ Πact Rsp (r)Πact = Πact RSTR (r)Πact
+[T 3.7 : Π-rel Rsp ] Psp ∈ A ⇒ Πact Rsp (ri )⊤ Rsp (rj )Πact = Πact RSTR (rj − ri )Πact
+
+5
+
+[deps : T 3.6, T 2.9, T 3.5, T 3.2,
+
+Tier 4: Attention Queries, Keys, and Scores
+WQ , WK , WV ∈ Rdh ×D
+
+[T 4.1 : W, q, k, v]
+
+D
+
+xi ∈ R , ri ∈ R
+qi = W Q x i ,
+
+kj = WK xj ,
+
+(act) ∅
+
+[T 4.2 : q (act) , k (act) , dact ] qi
+
+= Πact qi ,
+
+vj = WV xj
+
+(act) ∅
+
+kj
+
+= Πact kj
+∅
+
+dact = 2m
+
+6
+
+[deps : T 0.1, T 0.3]
+
+dc
+
+[deps : T 2.10, T 4.1]
+
+(act)
+
+[T 4.3 : q̃, k̃] q̃i = Πact Rsp (ri )qi
+
+[deps : T 3.5, T 4.2, T 2.10]
+
+(act)
+k̃j = Πact Rsp (rj )kj
+
+[T 4.4 : αij def]
+=√
+
+1
+dact
+
+⊤
+∅ q̃ k̃j
+αij = √i
+dact
+
+
+⊤
+(act)
+(act)
+(qi )⊤ Πact Rsp (ri )Πact
+Πact Rsp (rj )Πact kj
+
+[deps : T 4.3, T 4.2, T 2.10, T 0.3]
+
+2
+(uses Π⊤
+act = Πact = Πact )
+
+[T 4.5 : αij rel] Psp ∈ A ⇒ αij = √
+
+6
+
+
+
+1
+(act)
+(act)
+(qi )⊤ Πact RSTR (rj − ri )Πact kj
+2m
+
+[deps : T 4.4, T 3.6, T 3.7, T 4.2, T 2
+
+Tier 5: Stability Estimates
+[T 5.1 : ε comm]
+
+∅
+
+∅
+
+εab = |[La , Lb ]|, ε = max εab
+a,b
+X
+[A(r), A(s)] ≤
+|ra ||sb |εab ≤ |r|1 |s|1 ε
+
+[deps : T 1.3, T 1.1, T 0.10, T 0.9]
+
+a,b
+
+
+[T 5.2 : BCH err] log exp(A(r)) exp(A(s)) − (A(r) + A(s)) ≤ 12 |[A(r), A(s)]| + C|[A(r), A(s)]|2
+
+[T 5.3 : RSTR rel approx] RSTR (r)⊤ RSTR (s) − RSTR (s − r) ≤ C ε |r|1 |s|1 + O(ε2 )
+
+[T 5.4 : S = S− + E] S = S− + E,
+
+⊤
+S−
+= −S− ,
+
+|E| ≤ η,
+
+0≤η<1
+
+⊤
+S−
+= −S− ⇒ σ(S− ) ⊂ iR
+
+[T 5.5 : σmin (I + S− )]
+
+[deps : T 0.1
+
+[deps : T 1.6, T 1.4, T 1.5, T 5
+
+[deps : T 0.16, T 0.9]
+
+[deps : T 5.4, T 0.16, T 0.8]
+
+⇒ |1 + iµ| ≥ 1 for λ = iµ ∈ σ(S− )
+σmin (I + S− ) ≥ 1
+
+[T 5.6 : σmin (I + S)] σmin (I + S) ≥ σmin (I + S− ) − |E| ≥ 1 − η > 0
+
+[deps : T 5.4, T 5.5, T 0.19, T 0.9]
+
+⇒ I + S invertible
+
+[T 5.7 : Cayley Lip] Psp (S) = (I − S)(I + S)−1 ,
+
+Psp (S− ) = (I − S− )(I + S− )−1
+
+∅
+
+∅
+
+′
+
+|Psp (S) − Psp (S− )| ≤ C η
+
+7
+
+[deps : T 5.6, T 5.4, T 0.20, T 0
+
+
+
+
+A B
+∅
+[T 5.8 : ηmix ] Psp = U
+U ⊤ , ηmix = |B| + |C|
+C D
+
+⊤ 
+
+A B
+A B
+Psp ∈ SO(dh ) ⇒
+=I
+C D
+C D
+
+[deps : T 3.2, T 2.3, T 2.10, T 0.9, T 0.6, T 0.5, T 0.7]
+
+⇒ |A − I2m | ≤ C ′′ ηmix
+⇒ |Πact Psp Πact − Πact | ≤ C ′′ ηmix
+[T 5.9 : ΠRsp Π approx] Πact Rsp (r)Πact − Πact RSTR (r)Πact ≤ C ′′ ηmix
+
+[T 5.10 : αij stab]
+
+7
+
+[deps : T 3.5, T 2.11, T 5.8, T 2.10, T 0.9, T
+
+ (act) (act)
+∅
+∆ij = C ε|ri |1 |rj |1 + ηmix |qi | |kj |
+
+
+1
+(act)
+(act)
+≤ ∆ij
+αij − √ (qi )⊤ Πact RSTR (rj − ri )Πact kj
+2m
+
+[deps : T 4.4, T 5.9, T 5.3, T 4.2, T 5.
+
+Tier 6: Conclusions
+
+[T 6.1 : GOAL]
+
+
+
+
+1
+(act)
+(act)
+T 1.1 ∧ T 2.3 ∧ Psp ∈ A ⇒ αij = √ (qi )⊤ Πact RSTR (rj − ri )Πact kj
+2m
+
+[T 6.2 : GOALrob ]
+
+
+
+|[La , Lb ]| ≤ ε ∀a, b,
+
+[deps : T 4.5, T 3
+
+
+
+1
+(act)
+Psp ∈ SO(dh ) with mixing ηmix ⇒ αij ≈∆ij √ (qi )⊤ Πact RSTR (r
+2m
+
+∆ij ≤ C ε|ri |1 |rj |1 + η
+
+8
+
+Tier 6′ : Quantified Robustness
+
+[T 6′ .0 : εcomm , Λ, R, S, S− , E, ρ, η, ηmix ]
+
+∅
+
+εcomm = max [La , Lb ]
+a,b∈K
+
+∅
+
+Λ=
+
+dc
+X
+
+max
+u∈{1,...,m}
+
+[deps : T 1.1, T 2.3, T 2.4, T
+
+|λk,u |
+
+k=1
+
+∅
+
+R = max |ri |1
+i
+
+∅
+
+S = S− + E,
+
+⊤
+S−
+= −S− ,
+∅
+
+⊤
+
+E = −E
+∅
+
+ρ = |S|,
+
+η = |E|
+n
+o
+∅
+ηmix = max Πnull Psp Πact , Πact Psp Πnull
+m
+T 2.5 X
+
+[T 6′ .1 : |A(r)|, BCH const] |A(r)| ≤
+
+T 2.4
+
+|θu (r)| =
+
+u=1
+
+dc
+m X
+X
+
+rk λk,u ≤ Λ |r|1
+
+u=1 k=1
+∅
+
+CBCH (r, s) = C⋆ exp 2Λ(|r|1 + |s|1 )
+
+8
+
+
+
+[deps : T 2.5, T 2.4, T 0.9, T 0.12]
+
+T 0.13
+
+log eA(r) eA(s) − (A(r) + A(s)) ≤ 12 |[A(r), A(s)]| + C|[A(r), A(s)]|2
+
+[T 6′ .2 : BCH quant]
+
+T 5.1
+
+≤
+
+[deps : T 0.13, T 5
+
+2
+2 2
+1
+2 εcomm |r|1 |s|1 + CBCH (r, s) εcomm |r|1 |s|1
+T 1.6
+
+RSTR (r)⊤ RSTR (s) = e−A(r) eA(s)
+ T 0.11
+ T 6′ .2
+log RSTR (r)⊤ RSTR (s) = log e−A(r) eA(s) = A(s) − A(r) + ∆rs
+
+[T 6′ .3 : Rel approx RSTR ]
+
+[deps :
+
+T 1.3
+
+A(s) − A(r) = A(s − r)
+⇒ RSTR (r)⊤ RSTR (s) − RSTR (s − r) ≤ C1 εcomm |r|1 |s|1 + C2 ε2comm |r|21 |s|21
+T 0.19
+
+[T 6′ .4 : σmin (I + S), |(I + S)−1 |]
+
+σmin (I + S) ≥ σmin (I) − |S| = 1 − ρ
+
+[deps : T 0.19, T 0.8, T 0.9]
+
+|(I + S)−1 | = σmin (I + S)−1 ≤ (1 − ρ)−1
+[T 6′ .5 : Cayley Lip]
+
+Psp (S) = (I − S)(I + S)−1
+
+
+Psp (S1 ) − Psp (S2 ) = (S2 − S1 )(I + S1 )−1 + (I − S2 ) (I + S2 )−1 − (I + S1 )−1
+∅
+
+[deps : T 3.
+
+(I + S2 )−1 − (I + S1 )−1 = (I + S2 )−1 (S1 − S2 )(I + S1 )−1
+2
+⇒ |Psp (S1 ) − Psp (S2 )| ≤
+|S1 − S2 |
+σmin (I + S1 ) σmin (I + S2 )
+2
+⇒ |Psp (S) − Psp (S− )| ≤
+η
+(1 − ρ)2
+|S| = ρ < 1 ⇒ (I + S)−1 =
+
+[T 6′ .6 : Neumann]
+
+∞
+X
+(−S)t
+
+[deps : T 0.9, T 0.12]
+
+t=0
+
+Psp (S) = (I − S)
+
+∞
+∞
+X
+X
+(−S)t = I − 2
+(−1)u−1 S u
+t=0
+
+u=1
+
+[T 6′ .7 : QuadMix Πact ]
+
+Πact SΠact = 0,
+
+Πnull SΠnull = Snull
+
+2
+
+2
+
+[deps
+
+2
+
+Πact S Πact = (Πact SΠnull )(Πnull SΠact ) ⇒ |Πact S Πact | ≤ η
+∞
+∞
+X
+X
+u−1
+u
+Πact Psp (S)Πact − Πact = −2
+(−1) Πact S Πact = −2
+(−1)u−1 Πact S u Πact
+u=1
+
+⇒ Πact Psp (S)Πact − Πact ≤ 2
+
+∞
+X
+
+u=2
+∞
+X
+
+Πact S u Πact ≤ 2
+
+u=2
+
+u=2
+
+≤
+
+A B
+[T 6 .8 : Mix model-free] Psp = U
+U ⊤,
+C D
+′
+
+
+
+A⊤ A + C ⊤ C = I,
+
+2
+2
+η2 ≤
+η2
+1−ρ
+(1 − ρ)3
+
+AA⊤ + BB ⊤ = I
+
+|A − I| ≤ 2 max{|B|, |C|} = 2 ηmix
+⇒ Πact Psp Πact − Πact ≤ 2 ηmix
+9
+
+ρu−2 |Πact S 2 Πact |
+
+[deps : T 3.2, T 2.3, T 2.1
+
+
+[T 6′ .9 : Rob Rsp on act] Πact Rsp (r)Πact − Πact RSTR (r)Πact = Πact RSTR (r) Psp − Πact − Πnull Πact
+
+2
+
+T 0.9
+η 2 , (ESPR/Cayley/pure mix),
+=: δmix
+≤ Psp − Πact − Πnull ≤ (1 − ρ)3
+
+2 ηmix ,
+(model-free).
+
+[deps :
+
+
+(act)
+Πact Rsp (ri )⊤ Rsp (rj )Πact kj
+
+
+(act)
+(act)
+⋆ ∅ √1
+= 2m (qi )⊤ Πact RSTR (rj − ri )Πact kj
+αij
+
+T 4.4
+
+[T 6′ .10 : Logit err]
+
+αij =
+
+(act) ⊤
+√1 (q
+)
+2m i
+
+
+
+(act)
+
+⋆
+1
+|αij − αij
+| ≤ √2m
+|qi
+
+[dep
+
+(act)
+
+|
+
+
+
+· Πact Rsp (ri )⊤ Rsp (rj ) − RSTR (rj − ri ) Πact + Πact Rsp (·)Πact − Πact RSTR (·)Πact
+
+
+(act)
+(act)
+≤ |qi | |kj | C1 εcomm |ri |1 |rj |1 + C2 ε2comm |ri |21 |rj |21 + δmix
+
+⋆
+[T 6′ .11 : Rob theorem] αij − αij
+≤
+
+
+
+1
+2 + CBCH (ri , rj )
+
+
+
+(act)
+
+| |kj
+
+(act)
+
+| |kj
+
+εcomm |ri |1 |rj |1 |qi
+
++Cmix δmix |qi
+
+
+Cmix = 1, δmix = ηmix ,
+2
+
+, δmix = η 2 ,
+Cmix =
+(1 − ρ)3
+[T 6′ .12 : Replacements] {T 5.2, T 5.3} ⇝ {T 6′ .2, T 6′ .3}
+
+(act)
+
+|
+
+(act)
+
+|
+
+| |kj
+
+[deps : T 6′ .1, T 6′ .3, T 6′ .9
+
+(model-free),
+(ESPR/Cayley/pure mix).
+
+[deps : T 5.2, T 5.3, T 5.7, T 5.8, T 5.9, T 6.2, T 6′ .2, T 6′ .3,
+
+{T 5.7} ⇝ {T 6′ .5}
+{T 5.8, T 5.9} ⇝ {T 6′ .7, T 6′ .9}
+{T 6.2} ⇝ {T 6′ .11}
+
+9
+
+Tier 7: Positive Random Features and Variance Bounds
+
+[T 7.0 : N (0, In ), E, Var] N (0, In ) = the mean-zero Gaussian law on Rn with density (2π)−n/2 exp − 21 |w|2
+∅
+
+w ∼ N (0, In ) ⇒ E[w] = 0,
+
+
+
+E[ww⊤ ] = In
+
+∅
+
+E[·] = expectation with respect to the (joint) law of all Gaussian draws w
+Var[Z] = E[Z 2 ] − (E[Z])2
+∅
+
+10
+
+for any scalar random variable Z
+
+[
+
+[T 7.1 : RF setup]
+
+dact = 2m from T2.10
+For probabilistic estimates we draw w ∼ N (0, Idact ) in the sense of T7.0
+
+
+∅
+ϕw (x) = exp w⊤ x − 21 |x|2
+(x ∈ Rdact )
+(positive softmax random feature map as in FAVOR + estimators)
+
+
+∅
+Z(x, y; w) = ϕw (x) ϕw (y) = exp w⊤ (x + y) − 12 (|x|2 + |y|2 )
+(x, y ∈ Rdact )
+n
+
+rf
+X
+∅ 1
+dn (x, y) =
+Z(x, y; wt )
+SM
+rf
+nrf
+
+for nrf ∈ N, wt i.i.d. N (0, Idact )
+
+t=1
+
+dn (x, y) is our Monte Carlo estimator of exp(x⊤ y) (unnormalized softmax kernel)
+Note: SM
+rf
+[T 7.2 : qbi , b
+kj , αij ]
+
+q̃i , k̃j from T4.3,
+∅
+
+αij = √
+
+q
+
+1
+q̃ ⊤ k̃j
+dact i
+∅
+
+−
+
+qbi = da
+−1/4
+
+−1/4
+
+qbi⊤ b
+kj = (dact q̃i )⊤ (dact k̃
+
+( The attention logit αij is exactly a Euclidean dot product between qbi , b
+kj ∈ Rdact , with no rem
+[T 7.3 : EZ = exp(x⊤ y), unbiasedness]
+
+dn (b
+Note: SM
+qi , b
+kj ) is an unbiased positive estimator of exp(αij ), the unn
+rf
+
+11
+
+[T 7.4 : EZ 2 , VarZ, closed form]
+
+Continue with fixed x, y ∈ R
+
+Z(x, y; w) = exp w⊤ (x + y) − 12 (|x|2 + |y
+
+Z(x, y; w)2 = exp 2w⊤ (x + y) − (|x|2 + |y
+
+
+
+E[Z(x, y; w)2 ] = exp 12 |2(x + y)|2 − (|x|2 + |y|2 ) = exp 2|x + y|2 − (|x|2 + |y
+
+|x + y|2 = |x|2 + |y|2 + 2x⊤ y (as used in T
+
+⇒ 2|x + y|2 − (|x|2 + |y|2 ) = 2(|x|2 + |y|2 + 2x⊤ y) − (|x|2 + |y|2 ) = |x|2 + |y|2 + 4
+
+⇒ E[Z(x, y; w)2 ] = exp |x|2 + |y|2 + 4x
+E[Z(x, y; w)] = exp(x⊤ y)
+
+from T
+
+2
+
+(E[Z(x, y; w)]) = exp(2x
+
+Var[Z(x, y; w)] = E[Z(x, y; w)2 ] − (E[Z(x, y; w
+
+
+
+= exp |x|2 + |y|2 + 4x⊤ y − exp 2x
+
+
+h
+
+
+Var[Z(x, y; w)] = exp 2x⊤ y exp |x|2 + |y|2 + 2x⊤ y −
+Note: The single-sample variance is finite and given in closed form for all finite
+
+12
+
+dn , geom link]
+[T 7.5 : Var SM
+rf
+
+The draws wt in T7.1 are i.i.d., so the Z(·; wt ) are
+n
+
+rf
+X
+dn (x, y) = 1
+SM
+Z(x,
+rf
+nrf
+
+t=1
+
+nrf
+i
+h
+X
+1
+dn (x, y) = 1
+Var SM
+Var[Z(x, y; wt )] =
+Var[Z(x, y; w)]
+rf
+2
+nrf
+nrf t=1
+
+(i.i.d. variance sc
+
+Insert the expression from
+i
+h
+
+h
+
+
+dn (x, y) = 1 exp 2x⊤ y exp |x|2 + |y|2 + 2x⊤ y
+Var SM
+rf
+nrf
+
+Now specialise x = qbi , y = b
+kj from T7.2. Then x⊤ y
+
+h
+
+
+h
+i
+1
+2
+2
+b
+b
+dn (b
+exp
+2α
+exp
+|b
+q
+|
++
+|
+k
+|
++
+2α
+⇒ Var SM
+q
+,
+k
+)
+=
+ij
+i
+j
+ij
+i j
+rf
+nrf
+
+Relate |b
+qi |, |b
+kj | back to geometric quantities already controlled in T
+−1/4
+
+qbi = dact q̃i ,
+
+−1/4
+−1/2
+b
+kj = dact k̃j from T7.2 ⇒ |b
+qi |2 + |b
+kj |2 = dact (|q̃i |2 +
+(act)
+
+q̃i = Πact Rsp (ri )qi
+
+(act)
+
+and k̃j = Πact Rsp (rj )kj
+
+from
+
+Rsp (r) ∈ SO(dh ) (T3.5) so |Rsp (r)z| = |z| for all z ∈
+
+Πact is an orthogonal projector (T2.10) so |Πact z| ≤ |z| for
+(act)
+
+⇒ |q̃i | ≤ |qi
+
+|,
+
+|k̃j | ≤ |
+
+(act) 2
+
+⇒ |q̃i |2 + |k̃j |2 ≤ |qi
+
+| + |k
+
+dn (b
+( 1) The estimator SM
+qi , b
+kj ) is unbiased for exp(αij )
+rf
+
+10
+
+Tier 8′ : Tight Assumptions and OOD Dominance
+
+[T 8′ .0 : | · |2 , | · |F , Sdh −1 ] |M |2 = |M | (operator norm from T0.9),
+∅
+
+∅
+
+|M |F =
+
+q
+tr(M ⊤ M )
+
+[deps : T 0.9, T 0.3]
+
+Sdh −1 = {z ∈ Rdh | |z| = 1}
+∅
+
+[T 8′ .1 : (X , Y), D, T , Φ# D]
+
+X , Y measurable, (X, Y ) ∼ D
+
+T ⊆ {Φ : X → X bijective, measurable}
+′
+
+′
+
+Φ# D (pushforward) satisfies (X , Y ) ∼ Φ# D ⇔ (X ′ , Y ′ ) = (Φ · X, Y ), (X, Y ) ∼ D
+
+(Φ · x)(u) = x(Φ−1 u)
+∅
+
+[T 8′ .1bis : Parameterization map] ∃ Π∆ : T → supp(ν) measurable s.t. Πact RSTR (Π∆ (Φ))Πact matches the activ
+
+13
+
+[T 8′ .2 : Label invariance] ∀Φ ∈ T :
+
+
+
+Pr
+(X,Y )∼D
+
+
+Y ′ = Y where (X ′ , Y ′ ) ∼ Φ# D = 1
+
+[T 8′ .3 : ψ, ℓ, bounded logits, L]
+
+[deps : T 8′ .1]
+
+ψ : Rdh → RC ,
+
+ℓ : RC × Y → R+
+
+[dep
+
+∃Bψ > 0 : sup |ψ(zf (x))|2 ≤ Bψ (spectral control or fixed LayerNorm)
+x∈X
+
+∃L > 0 : ∀y, ℓ(·, y) is L-Lipschitz on {u ∈ RC : |u|2 ≤ Bψ }
+[T 8′ .4 : zf , measurable, Bz ] zf : X → Rdh measurable,
+
+sup |zf (x)| ≤ Bz
+
+[deps : T 0.9]
+
+x∈X
+
+[T 8′ .5 : ν, ∆, R∆ ] ν : prob. law on Rdc ,
+
+∆ ∼ ν,
+
+|∆|1 ≤ R∆ a.s.
+
+[deps : T 0.1, T 0.9]
+
+[T 8′ .5bis : r-radius] r ∈ Rdc ranges over {r : |r|1 ≤ R}, R > 0 fixed
+
+[T 8′ .6 : HSTRING , HESPR ]
+
+[deps : T 0.9]
+
+∅
+
+HSTRING = {f : Psp ∈ A, [La , Lb ] = 0}
+
+[deps : T 3.4, T
+
+∅
+
+HESPR = {f : Psp ∈ SO(dh ), |[La , Lb ]| ≤ εcomm , ηmix as in T6’.0}
+HSTRING ⊂ HESPR
+[T 8′ .7 : IRspec (f )]
+
+Πact ∈ Rdh ×dh is the orthogonal projector onto the first 2m coordinates (T2.10), Πnull = I −
+
+RSTR (·) acts as block 2 × 2 rotations on m planes with angles from β (identity on null block;
+⊤
+Rsp (r) = Psp RSTR (r)Psp
+for Psp ∈ SO(dh )
+∅
+
+∅
+
+IRspec (f ) = E∆∼ν
+
+sup
+
+Πact Rsp (r)⊤ Rsp (r + ∆)Πact − Πact RSTR (∆)
+
+|r|1 ≤R
+
+[T 8′ .8 : Ccomm , Cmix , CT , ρ] Ccomm = 12 εcomm (R + R∆ )2 + CBCH (2R + R∆ ) ε2comm (R + R∆ )4
+∅
+
+[deps : T 6′ .1, T
+
+∅
+
+ρ = |S|2 < 1 for Psp = cayley(S) (Neumann regime, T6’.6)
+
+2
+
+η 2 , (ESPR/Cayley/pure mix),
+∅
+Cmix = (1 − ρ)3
+
+ηmix ,
+(model-free)
+∅
+
+CT = 1
+
+[T 8′ .8bis : Small-angle/BCH regime] εcomm , ηmix , R, R∆ are small so that higher-order BCH terms are absorb
+
+[T 8′ .9 : ∆T (f )] ∆T (f ) = EΦ∼µ E(X,Y )∼D zf (Φ · X) − zf (X)
+∅
+
+14
+
+[deps : T 8′ .1, T 8′ .4]
+
+[T 8′ .10 : Geom ⇒ IR link (tight Cz )] z ′ = U ′ z, z = U z, |z| ≤ Bz ⇒ |z ′ − z| = |(U ′ − U )z| ≤ |U ′ − U |2 Bz
+
+[d
+
+∅
+
+Cz = Bz ⇒ ∆T (f ) ≤ Cz IRspec (f )
+[T 8′ .11 : Rtrain , RT ]
+
+∅
+
+Rtrain (f ) = E(X,Y )∼D ℓ(ψ(zf (X)), Y )
+
+[deps : T 8′ .3, T 8′ .4, T 8′ .1]
+
+∅
+
+RT (f ) = EΦ∼µ E(X,Y )∼D ℓ(ψ(zf (Φ · X)), Y )
+[T 8′ .12 : Shift-Lipschitz] RT (f ) − Rtrain (f ) ≤ L ∆T (f ) ≤ LCz IRspec (f )
+
+[T 8′ .13 : Upper control of IRspec ] IRspec (f ) ≤ Ccomm + Cmix
+
+[deps : T 8′ .3, T 8′ .10, T 8′ .11]
+
+[deps : T 6′ .11, T 8′ .7, T 8′ .8, T 8′ .8bis]
+
+[T 8′ .14 : cT (noncommuting lower bound on active block)]
+
+m < dh /2 ∧ ∃a ̸= b : [La , Lb ] ̸= 0
+∃κT > 0 : E∆∼ν
+
+inf
+
+|r|1 ≤R
+
+RSTR (r)⊤ RSTR (r + ∆) − R
+⇒
+
+[T 8′ .15 : Reachability in ESPR] ∀δ > 0 ∃fδ ∈ HESPR : εcomm ≤ δ, ηmix ≤ δ
+
+inf
+
+f ∈HSTRING
+
+IRspec (f ) ≥
+
+[deps : T 6′ .11, T 8′ .6, T 8′ .7, T 8′ .8
+
+δ→0
+
+⇒ IRspec (fδ ) ≤ Ccomm (δ) + Cmix (δ) −−−→ 0
+[T 8′ .16 : Infimum gap]
+
+inf
+
+f ∈HESPR
+
+≤
+
+RT (f ) ≤
+inf
+
+f ∈HSTRING
+
+
+Rtrain (f ) + LCz IRspec (f )
+f ∈HESPR
+
+Rtrain (f ) + LCz IRspec (f ) − LCz cT
+inf
+
+≤
+
+inf
+
+f ∈HSTRING
+
+[deps : T 8′ .12, T 8′ .14, T 8′ .15, T
+
+RT (f ) − LCz cT
+
+∅ b
+[T 8′ .17 : Optimization: Polyak–Lojasiewicz (PL)] ∃µ > 0, Lg > 0 : ∀H ∈ {HSTRING , HESPR }, LH (f ) = R
+train (f
+
+satisfies PL: 21 ∥∇LH (f )∥2 ≥ µ LH (f )
+
+∇LH is Lg -Lipschitz ⇒ GD finds global minimizer fˆλ,H ∈
+
+ S(H)
+∃S0 , c̃ > 0 : Cn (H, δ) = c √ +
+n
+
+[T 8′ .18 : Cn (H, δ) (Rademacher; explicit scaling)]
+S(HSTRING ) ≤ S0 ,
+
+
+S(HESPR ) ≤ S0 + c̃ · rank(E) + εcomm g
+
+h
+i
+btrain (f ) + Cn (H, δ) ≥ 1 − δ
+[T 8′ .19 : Uniform generalization] Pr ∀f ∈ H : Rtrain (f ) ≤ R
+15
+
+r
+
+∅
+
+[deps : T 8′ .18]
+
+h
+i
+btrain (f ) + Cn (H, δ) + LCz IRspec (f ) ≥ 1 − δ
+[T 8′ .20 : Shift risk bound (uniform)] Pr ∀f ∈ H : RT (f ) ≤ R
+
+[T 8′ .21 : Achieved OOD gap]
+
+[deps : T 8′ .16, T 8′ .17
+
+∅
+
+∅
+
+ϵ0 = LCz cT , ∆gen = Cn (HESPR , δ) − Cn (HSTRING , δ)
+h
+i
+Pr RT (fˆλ,HESPR ) ≤ RT (fˆλ,HSTRING ) − ϵ0 + ∆gen ≥ 1 − δ
+
+[T 8′ .22 : Worst-case corollary]
+
+∅
+
+Rsup (f ) = sup E(X,Y )∼D ℓ(ψ(zf
+Φ∈T
+
+Rsup (f ) − Rtrain (f ) ≤ LCz
+
+sup
+
+sup
+
+⊤
+
+Πact Rsp (r) Rsp (r + ∆)Πact − Πact RST
+
+∆∈supp(ν) |r|1 ≤R
+
+and sup =
+
+sup
+
+Φ∈T
+
+∆∈supp(ν)
+
+[T 8′ .23 : No benefit when commuting (sharpness)] If ∀∆ ∈ supp(ν) : [La , Lb ] = 0 ∧ Psp ∈ A ⇒ IRspec (f ) = 0
+⇒ cT = 0, ϵ0 = 0
+
+16
+
+
