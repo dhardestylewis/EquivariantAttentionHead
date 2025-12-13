@@ -10,3 +10,4 @@
 - [x] Correct misnamed paper directories based on actual PDF content (UNREVIEWED) [Added: 2025-12-13 14:35] (Completed: 2025-12-13 14:38)
 - [x] Create `publications/` and `references/reference_drafts/` structure (UNREVIEWED) [Added: 2025-12-13 14:38] (Completed: 2025-12-13 14:39)
 - [x] Remove corrupted PDFs and create `CORRUPTED_REFERENCES.md` with IEEE citations (UNREVIEWED) [Added: 2025-12-13 14:40] (Completed: 2025-12-13 14:41)
+- [x] Create `GUIDELINES.md` and organize draft files into `.d` directories (UNREVIEWED) [Added: 2025-12-13 14:43] (Completed: 2025-12-13 14:54)

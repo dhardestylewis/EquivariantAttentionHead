@@ -42,3 +42,11 @@
 > if not delete
 > 
 > make a GUIDELINE that subdirs of multiple files with the same filename should be within their own directories with identical filename and extension '.d' and apply to string-drafts
+
+## 2025-12-13 14:46 - Simplify References Structure
+
+> remove the outer references to reference_drafts
+
+## 2025-12-13 14:54 - Continue Session
+
+> continue beyond Qian
