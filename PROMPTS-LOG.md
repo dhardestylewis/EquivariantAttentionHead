@@ -14,3 +14,23 @@
 > each of the references must be kept separately
 > 
 > ensure each of the directories for reference papers are named using a similar scheme to Schenck
+
+## 2025-12-13 14:35 - Verification Request
+
+> are you confident you named those correctly check again
+
+## 2025-12-13 14:38 - Directory Restructuring
+
+> i still see robust-rotary-robustness.pdf and related files at the toplevel undealtwith
+> 
+> name the outer references the inner papers place those papers directories within papers rename to publications and create a separate directory within new references for my own naming those reference_drafts
+
+## 2025-12-13 14:40 - Handle Corrupted References
+
+> Qian was misplaced
+> 
+> if Choromanski and Elhage are corrupted then create a file CORRUPTED_REFERENCES look up their citations and place their citation in IEEE within that file, that file should belong at the top-level within publications
+
+## 2025-12-13 14:41 - Delete Corrupted Directories
+
+> and then having done that delete those files and their directories

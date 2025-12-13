@@ -7,3 +7,6 @@
 - [x] Move PDF papers to `.d` directories and generate TXT (UNREVIEWED) [Added: 2025-12-13 14:29] (Completed: 2025-12-13 14:30)
 - [x] Reorganize and rename `robust-rotary-robustness.tex` to `string-robustness.d` (UNREVIEWED) [Added: 2025-12-13 14:30] (Completed: 2025-12-13 14:31)
 - [x] Verify all papers have corresponding `.txt` transcripts (UNREVIEWED) [Added: 2025-12-13 14:30] (Completed: 2025-12-13 14:31)
+- [x] Correct misnamed paper directories based on actual PDF content (UNREVIEWED) [Added: 2025-12-13 14:35] (Completed: 2025-12-13 14:38)
+- [x] Create `publications/` and `references/reference_drafts/` structure (UNREVIEWED) [Added: 2025-12-13 14:38] (Completed: 2025-12-13 14:39)
+- [x] Remove corrupted PDFs and create `CORRUPTED_REFERENCES.md` with IEEE citations (UNREVIEWED) [Added: 2025-12-13 14:40] (Completed: 2025-12-13 14:41)
