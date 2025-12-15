@@ -12,3 +12,5 @@
 - [x] Remove corrupted PDFs and create `CORRUPTED_REFERENCES.md` with IEEE citations (UNREVIEWED) [Added: 2025-12-13 14:40] (Completed: 2025-12-13 14:41)
 - [x] Create `GUIDELINES.md` and organize draft files into `.d` directories (UNREVIEWED) [Added: 2025-12-13 14:43] (Completed: 2025-12-13 14:54)
 - [x] Create `references/string-drafts/` parent and rename references with `-REFERENCE` suffix (UNREVIEWED) [Added: 2025-12-13 14:55] (Completed: 2025-12-13 14:57)
+- [x] Archive original training scripts to `references/original_code/` (UNREVIEWED) [Added: 2025-12-15 18:05] (Completed: 2025-12-15 18:05)
+- [x] Create `references/original_code/CODE_ANALYSIS.md` documenting original implementation (UNREVIEWED) [Added: 2025-12-15 18:05] (Completed: 2025-12-15 18:05)

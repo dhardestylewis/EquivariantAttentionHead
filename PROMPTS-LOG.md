@@ -58,3 +58,15 @@
 ## 2025-12-13 14:56 - Reference Naming Convention
 
 > instead of marking -reference mark -REFERENCE each of these references
+
+## 2025-12-13 15:38 - Analyze Source Files
+
+> is this test_implementation file of string or robustness? what about cifar and mnist?
+
+## 2025-12-13 15:45 - Source Restructuring
+
+> move analysis movel and rotations into their own appropriately named subdir
+
+## 2025-12-15 18:05 - Wrap Up
+
+> warp up
