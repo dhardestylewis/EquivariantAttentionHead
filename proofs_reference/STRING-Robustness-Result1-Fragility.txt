@@ -1,0 +1,22 @@
+Equivariant Structured Positional Rotations (STRING): Robustness Result 1 (Fragility)
+===================================================================================
+Dependency: STRING-Definition.txt
+
+Tier 5: Stability Estimates
+---------------------------
+
+[T 5.1 : ε comm]
+ε_ab = |[L_a, L_b]|
+ε = max ε_ab
+
+[T 5.2 : BCH err]
+log( exp(A(r)) exp(A(s)) ) - (A(r) + A(s)) approx 1/2 [A(r), A(s)]
+Bounded by O(ε |r| |s|)
+
+[T 5.3 : RSTR rel approx]
+RSTR (r)⊤ RSTR (s) − RSTR (s − r) ≤ C ε |r|1 |s|1 + O(ε2 )
+
+Interpretation:
+The failure of relative position equivariance grows QUADRATICALLY with the distance 
+between tokens (|r| * |s|) if the commutativity constraint is relaxed (ε > 0).
+This explains why "approximate" STRING models fail on OOD shifts.

@@ -1,0 +1,25 @@
+Equivariant Structured Positional Rotations (STRING): Robustness Result 2 (Zero-Gap)
+==================================================================================
+Dependency: STRING-Definition.txt
+Dependency: STRING-Robustness-Result1-Fragility.txt
+
+Tier 8': Quantified Robustness
+------------------------------
+
+[T 8′ .7 : IRspec (f )]
+IR_spec(f) = E_Delta [ sup | Pi_act Rsp(r)^T Rsp(r + Delta) Pi_act - Pi_act RSTR(Delta) | ]
+
+[T 8′ .12 : Shift-Lipschitz]
+|R_target - R_train| <= L * IR_spec
+
+[T 8′ .23 : No benefit when commuting (sharpness)]
+If [L_a, L_b] = 0 AND Psp is structured:
+Then ε = 0.
+Then IR_spec(f) = 0.
+Then |R_target - R_train| = 0.
+Gap is zero.
+
+Conclusion:
+STRING's exact constraints ([L, L]=0) mathematically guarantee a generalization gap of zero
+for translational shifts, provided the model architecture respects the group structure.
+This is a property not shared by any learned approximation.

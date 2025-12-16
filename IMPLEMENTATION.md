@@ -29,18 +29,17 @@ The implementation directly realizes the mathematical constructions from the pro
 
 ## Project Structure
 
-```
 EquivariantAttentionHead/
 ├── src/
 │   ├── __init__.py
 │   ├── rotations.py          # R_STR implementation (T2.7)
 │   ├── attention.py          # Relative-position attention (T4.5)
-│   └── model.py              # Vision Transformer architecture
-├── train_mnist.py            # MNIST training script
-├── train_cifar.py            # CIFAR-10 training script
-├── proof-axiomatic-compact.tex   # Formal proof (T0.1-T6.2)
-└── proof-algebraic-detailed.tex  # Detailed proof (BEG-0 to BEG-6)
-```
+│   ├── model.py              # Vision Transformer architecture
+│   └── Benchmarking_Robust_STRING.py # End-to-end robustness sweep
+├── references/
+│   ├── string-drafts/        # Proof LaTeX files
+│   └── original_code/        # Archived training scripts
+└── GUIDELINES.md             # Project guidelines
 
 ## Installation
 

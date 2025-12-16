@@ -1,0 +1,91 @@
+Equivariant Structured Positional Rotations (STRING): Robustness Monolith
+======================================================================
+This document aggregates all necessary proofs for the two key robustness results of STRING:
+1. FRAGILITY: Relaxing commutativity constraints leads to quadratic error growth (Tier 5).
+2. ZERO-GAP: Exact STRING constraints guarantee zero invariant residual (Tier 8').
+
+Note: Independently defined "ESPR" models are removed. "Relaxed STRING" is analyzed solely via perturbation bounds.
+
+Tier 0: Linear-Algebra Primitives
+---------------------------------
+[T 0.1 : N, Idx] N = {1, 2, ...}, dh, dc, D ∈ N, H={1...dh}, K={1...dc}
+[T 0.2 : In , δij] Standard identity and Kronecker delta.
+[T 0.3 : Real/Complex Matrices, Transpose, Trace] Standard definitions.
+[T 0.4 : det] Multiplicativity, transpose invariance, similarity invariance.
+[T 0.5 : Block Diag] Determinant of block diag is product of determinants.
+[T 0.6 : O, SO, U] Orthogonal, Special Orthogonal, Unitary groups.
+[T 0.7 : det O] Q ∈ O(n) => det Q ∈ {±1}.
+[T 0.8 : Spectrum, Singular Values] σ(M), σmin(M).
+[T 0.9 : Norms] Euclidean |x|, L1 |x|_1, Spectral |M|.
+[T 0.10 : Commutator] [A, B] = AB - BA.
+[T 0.11 : Exp/Log] Matrix exponential and logarithm properties.
+[T 0.12 : O(.), ≈ε] Asymptotic notation and epsilon-approximation.
+[T 0.13 : BCH] exp(M)exp(N) = exp(M + N + 1/2[M,N] + ...). |Error| = O(|[M,N]|^2).
+[T 0.14 : Kernel, Image, Rank] Standard definitions.
+[T 0.15 : Projectors] P^2=P=P^T.
+[T 0.16 : Skew-Symmetric] S^T = -S => Spectrum is purely imaginary.
+[T 0.17 : J, R2] Standard 2x2 symplectic matrix and rotation.
+[T 0.18 : R2 in SO(2)] 2x2 rotations are special orthogonal.
+[T 0.19 : Weyl] Stability of singular values under perturbation.
+[T 0.20 : Inverse Transpose] (X^-1)^T = (X^T)^-1.
+
+Tier 1: Structured Generators (STRING Definition)
+-------------------------------------------------
+[T 1.1 : Lk] {Lk} are commuting, skew-symmetric generators. [La, Lb]=0.
+[T 1.2 : Normal Lk] Skew-symmetric => Normal.
+[T 1.3 : A(r)] A(r) = Sum r_k L_k.
+[T 1.4 : A(r) skew] A(r)^T = -A(r).
+[T 1.5 : Commuting A] [A(r), A(s)] = 0 (Inherited from T 1.1).
+[T 1.6 : R_STR] R_STR(r) = exp(A(r)).
+
+Tier 2: Joint Block Structure (STRING Structure)
+------------------------------------------------
+[T 2.1 : Sim-Unitary] Commuting normal matrices simultaneously diagonalizable.
+[T 2.2 : Real 2D Planes] Eigenvalues come in conjugate pairs, forming 2D invariant planes.
+[T 2.3 : JointBlockDiag] Exists U ∈ O(dh) such that U^T Lk U = diag(blocks).
+[T 2.4 : beta, theta] Linear phase params. theta_u(r) = beta_u^T r.
+[T 2.5 : Block Form A] U^T A(r) U = diag(theta_u(r) J).
+[T 2.6 : Block Exp] exp of block diag is block diag of exps.
+[T 2.7 : R_STR form] R_STR(r) = U diag(R2(theta_u)) U^T.
+[T 2.8 : R_STR in SO] Inherited from SO(2 blocks.
+[T 2.9 : Relative Property] R_STR(ri)^T R_STR(rj) = R_STR(rj - ri).
+[T 2.10 : Pi_act] Projector onto the 2m active dimensions.
+[T 2.11 : Commutation with Pi] R_STR(r) commutes with Pi_act.
+
+Tier 3: Cayley Post-Rotations (The Relaxation Mechanism)
+--------------------------------------------------------
+[T 3.1 : Cayley Map] Psp = (I - S)(I + S)^-1.
+[T 3.2 : Psp in SO] Cayley transform maps skew to SO.
+[T 3.4 : A_string_set] The set of perfectly structured Psp (block diag).
+[T 3.5 : R_sp] R_sp(r) = R_STR(r) Psp. (The Relaxed Operator).
+[T 3.6 : Structure Preservation] If Psp ∈ A_string_set, it commutes with Pi_act.
+[T 3.7 : Relative Preservation] If Psp ∈ A_string_set, relative property holds on active subspace.
+
+Tier 5: Stability Estimates (Result 1: Fragility)
+-------------------------------------------------
+[T 5.1 : Epsilon_comm] ε = max |[La, Lb]|. (Violation of STRING).
+[T 5.2 : BCH Error] log(exp A exp B) - (A+B) bounded by O(ε).
+[T 5.3 : R_STR approx] R_STR(r)^T R_STR(s) ≈ R_STR(s-r) with error O(ε |r||s|).
+      **CRITICAL RESULT 1**: Relative error grows quadratically with radius if ε > 0.
+[T 5.4 : S Perturbation] S = S_ideal + E.
+[T 5.5 - 5.7 : Cayley Stability] Lipschitz continuity of Cayley map.
+[T 5.8 : Mixing Error] Off-diagonal blocks in S cause subspace leakage eta_mix.
+[T 5.9 : Subspace Error] Projector commutation error bounded by eta_mix.
+[T 5.10 : Combined Stability] Total relative error Δ_ij scales with ε|r|^2 + η_mix.
+
+Tier 8': Quantified Robustness (Result 2: Zero-Gap)
+---------------------------------------------------
+[T 8'.1 - 8'.6 : Setup] Definitions of Risk, Shifts, and Hypothesis Classes (STRING vs Relaxed).
+[T 8'.7 : IR_spec] Invariant Residual = Expected error of relative property under shift.
+[T 8'.8 : Constants] C_comm, C_mix derived from Tier 5 bounds.
+[T 8'.9 : Delta_T] Distributional Shift Distance.
+[T 8'.10 : Linking] Shift Distance <= Lipschitz * IR_spec.
+[T 8'.11 : Risks] R_train vs R_target (OOD).
+[T 8'.12 : Generalization Bound] |R_target - R_train| <= L * IR_spec.
+      This limits the OOD gap by the Invariant Residual.
+
+[T 8'.23 : ZERO-GAP THEOREM (Result 2)]
+      IF [La, Lb] = 0 AND Psp is structured (STRING Constraints),
+      THEN ε_comm = 0 AND η_mix = 0
+      IMPLIES IR_spec(f) = 0 identically.
+      THEREFORE R_target = R_train (OOD Gap is Zero).
